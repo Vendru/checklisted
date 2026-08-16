@@ -4,9 +4,11 @@ import com.checklisted.app.domain.model.Completion
 import com.checklisted.app.domain.model.Goal
 import com.checklisted.app.domain.model.PeriodKey
 import com.checklisted.app.domain.model.Recurrence
+import com.checklisted.app.domain.model.ThemeMode
 import com.checklisted.app.domain.model.WeekStart
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
+import java.time.LocalTime
 
 interface GoalRepository {
     /** Active goals, ordered for display. */
@@ -62,8 +64,29 @@ interface CompletionRepository {
     )
 }
 
+/** Everything the user can change, and nothing that changes on its own. */
+data class Settings(
+    val weekStart: WeekStart = WeekStart.Default,
+    val themeMode: ThemeMode = ThemeMode.Default,
+    val reminderEnabled: Boolean = false,
+    val reminderTime: LocalTime = DEFAULT_REMINDER_TIME,
+) {
+    companion object {
+        /** Late enough to be a nudge about the day, early enough not to wake anyone. */
+        val DEFAULT_REMINDER_TIME: LocalTime = LocalTime.of(20, 0)
+    }
+}
+
 interface SettingsRepository {
+    val settings: Flow<Settings>
+
     val weekStart: Flow<WeekStart>
 
     suspend fun setWeekStart(weekStart: WeekStart)
+
+    suspend fun setThemeMode(themeMode: ThemeMode)
+
+    suspend fun setReminderEnabled(enabled: Boolean)
+
+    suspend fun setReminderTime(time: LocalTime)
 }
