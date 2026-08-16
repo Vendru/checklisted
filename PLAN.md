@@ -167,17 +167,32 @@ commit e um resumo para você antes de eu seguir.
 Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 110 testes
+- [x] `./gradlew test` passando — 120 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
+- [x] `./gradlew verifyPaparazziDebug` passando — 20 screenshots
+
 `./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
 
-Não verificado: **aparência e comportamento em dispositivo**. O container não tem
-KVM, então não há emulador, e previews do Compose não renderizam headless. Isso
-deixa sem validação prática: o visual em geral, o gesto de arraste (incluindo a
-rolagem automática), o disparo real do WorkManager e a notificação.
+### Screenshots
+
+Paparazzi renderiza Compose na JVM via layoutlib, sem emulador. As imagens douradas
+ficam em `app/src/test/snapshots/` e cobrem cada componente em tema claro e escuro,
+mais as superfícies reais: lista de metas, estado vazio, estatísticas e heatmap.
+
+- `./gradlew recordPaparazziDebug` regrava as imagens
+- `./gradlew verifyPaparazziDebug` falha se algo mudou de aparência
+
+Olhar as primeiras renderizações encontrou três defeitos que nenhum teste de
+comportamento pegaria: o estado desativado virava cinza de baixo contraste, a
+ilustração do estado vazio tinha tracinhos fora da trajetória do check, e o tile de
+estatística acentuado ficava com texto bone sobre rosa.
+
+Continua **não verificado em dispositivo**: o gesto de arraste (incluindo a rolagem
+automática), o disparo real do WorkManager e a notificação. Screenshot test cobre
+pixels parados, não gesto nem agendamento.
 
 ---
 
