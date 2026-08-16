@@ -123,13 +123,21 @@ commit e um resumo para você antes de eu seguir.
 > provisório e agora está substituída pela tela Hoje. Os `@Preview` de cada
 > componente continuam de pé.
 
-### Fase 4 — Streaks + histórico
+### Fase 4 — Streaks + histórico ✅
 
 - Tela de detalhe da meta: streak atual, recorde, taxa da janela correta,
   heatmap dos últimos 3 meses **daquela meta**
 - Tela de Histórico global: grade por dia com intensidade proporcional
 - Toque na célula marca/desmarca o período retroativamente
 - **Entregável:** as duas telas navegáveis a partir de Hoje
+
+> Uma meta semanal ou mensal acende **todos** os dias do período em que foi
+> concluída. O grid mostra quando o usuário estava em dia, e uma meta mensal
+> marcada no dia 3 estava em dia o mês inteiro, não só naquele dia.
+>
+> Tocar numa célula do Histórico global abre o dia com as metas daquela data,
+> já que um dia agrega várias metas e um toque só seria ambíguo. No heatmap do
+> detalhe, o toque marca direto — ali só existe uma meta.
 
 ### Fase 5 — Lembretes + polimento
 
@@ -145,10 +153,10 @@ commit e um resumo para você antes de eu seguir.
 
 ## Definição de pronto
 
-Estado após a Fase 3:
+Estado após a Fase 4:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 70 testes
+- [x] `./gradlew test` passando — 94 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
