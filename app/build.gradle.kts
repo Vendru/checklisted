@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.paparazzi)
 }
 
 // Hoisted out of the filter lambda below: referencing `layout` inside the Spec
