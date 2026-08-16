@@ -17,14 +17,24 @@ import com.checklisted.app.ui.components.NeoNoIndication
 
 /** Fixed measurements the whole design system is built from. */
 object NeoTokens {
-    /** Every interactive component carries this border. */
-    val BorderWidth = 3.dp
+    /**
+     * Every surface carries this border.
+     *
+     * Down from 3.dp: the edge still draws the shape, but stops being the loudest
+     * thing on screen.
+     */
+    val BorderWidth = 1.5.dp
 
-    /** Hard offset shadow: no blur, no spread, no Material elevation anywhere. */
-    val ShadowOffset = 4.dp
+    /**
+     * Offset shadow, still hard-edged and still not Material elevation.
+     *
+     * Shorter than before and painted in a warm tone from the palette rather than
+     * black, so it reads as depth instead of as a printing artefact.
+     */
+    val ShadowOffset = 3.dp
 
-    /** Thinner border for dense, non-interactive marks such as heatmap cells. */
-    val HairlineBorder = 2.dp
+    /** Thinner border for dense marks such as heatmap cells. */
+    val HairlineBorder = 1.dp
 
     val MinTouchTarget = 48.dp
 
@@ -88,34 +98,34 @@ fun NeoTheme(
  * `primary`, which would wash every raised Material surface in yellow.
  */
 private fun NeoColors.toColorScheme(): ColorScheme = lightColorScheme(
-    primary = NeoYellow,
-    onPrimary = onAccent,
-    primaryContainer = NeoYellow,
-    onPrimaryContainer = onAccent,
-    inversePrimary = NeoYellow,
-    secondary = NeoTeal,
-    onSecondary = onAccent,
-    secondaryContainer = NeoTeal,
-    onSecondaryContainer = onAccent,
-    tertiary = NeoPink,
-    onTertiary = onAccent,
-    tertiaryContainer = NeoPink,
-    onTertiaryContainer = onAccent,
+    primary = action,
+    onPrimary = onAction,
+    primaryContainer = action,
+    onPrimaryContainer = onAction,
+    inversePrimary = action,
+    secondary = dataHigh,
+    onSecondary = onAction,
+    secondaryContainer = dataHigh,
+    onSecondaryContainer = onAction,
+    tertiary = action,
+    onTertiary = onAction,
+    tertiaryContainer = action,
+    onTertiaryContainer = onAction,
     background = background,
     onBackground = ink,
     surface = surface,
     onSurface = ink,
     surfaceVariant = surfaceMuted,
-    onSurfaceVariant = ink,
+    onSurfaceVariant = inkSoft,
     surfaceTint = Color.Transparent,
     inverseSurface = ink,
     inverseOnSurface = surface,
-    error = NeoOrange,
-    onError = onAccent,
-    errorContainer = NeoOrange,
-    onErrorContainer = onAccent,
-    outline = ink,
-    outlineVariant = ink,
+    error = action,
+    onError = onAction,
+    errorContainer = action,
+    onErrorContainer = onAction,
+    outline = divider,
+    outlineVariant = divider,
     scrim = Color.Black,
     surfaceBright = surface,
     surfaceContainer = surface,

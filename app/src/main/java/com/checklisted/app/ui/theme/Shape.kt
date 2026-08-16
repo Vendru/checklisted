@@ -4,11 +4,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
-/** Corners stay between 0.dp and 4.dp — anything rounder stops reading as neobrutalist. */
+/**
+ * Corners are rounded enough to stop shouting and not so far as to go soft.
+ *
+ * The previous 0–4.dp scale was what made every surface read as a printed block;
+ * 10.dp keeps the structure while letting the app sit still.
+ */
 val NeoShapes = Shapes(
-    extraSmall = RoundedCornerShape(0.dp),
-    small = RoundedCornerShape(2.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(4.dp),
-    extraLarge = RoundedCornerShape(4.dp),
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(10.dp),
+    large = RoundedCornerShape(14.dp),
+    extraLarge = RoundedCornerShape(18.dp),
 )
