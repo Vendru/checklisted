@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,28 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.checklisted.app.R
 import com.checklisted.app.domain.model.Recurrence
+import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoButton
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoChip
 import com.checklisted.app.ui.components.NeoDialog
-import com.checklisted.app.ui.components.NeoIconBack
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoTextField
-import com.checklisted.app.ui.components.neoClickable
-import com.checklisted.app.ui.components.neoSurface
-import com.checklisted.app.ui.components.rememberNeoInteractionSource
 import com.checklisted.app.ui.theme.NeoAccent
-import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.NeoTokens
 import com.checklisted.app.ui.theme.condensed
 import com.checklisted.app.ui.theme.displayUppercase
 
@@ -111,7 +103,7 @@ private fun GoalEditorContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BackButton(onClick = onBack)
+            NeoBackButton(onClick = onBack)
             Text(
                 text = stringResource(
                     if (state.isEditing) R.string.goal_editor_title_edit else R.string.goal_editor_title_new,
@@ -201,24 +193,6 @@ private fun FieldLabel(text: String) {
         style = MaterialTheme.typography.labelMedium,
         color = NeoTheme.colors.ink,
     )
-}
-
-@Composable
-private fun BackButton(onClick: () -> Unit) {
-    val interactionSource = rememberNeoInteractionSource()
-    val label = stringResource(R.string.action_back)
-
-    Row(
-        modifier = Modifier
-            .neoSurface(color = NeoTheme.colors.surface, shape = NeoShapes.small)
-            .neoClickable(interactionSource = interactionSource, onClick = onClick)
-            .size(NeoTokens.MinTouchTarget)
-            .semantics { contentDescription = label },
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        NeoIconBack()
-    }
 }
 
 /** Colour tag picker. Each swatch is a filled checkbox, so selection reads at a glance. */

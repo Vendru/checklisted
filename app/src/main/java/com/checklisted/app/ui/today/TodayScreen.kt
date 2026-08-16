@@ -36,6 +36,7 @@ import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.ui.components.NeoButton
 import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoIconPlus
+import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.ReorderState
 import com.checklisted.app.ui.components.rememberReorderState
@@ -49,6 +50,7 @@ import com.checklisted.app.ui.theme.displayUppercase
 fun TodayScreen(
     onCreateGoal: () -> Unit,
     onOpenGoal: (String) -> Unit,
+    onOpenHistory: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -61,6 +63,7 @@ fun TodayScreen(
         onToggle = viewModel::toggle,
         onOpenGoal = onOpenGoal,
         onCreateGoal = onCreateGoal,
+        onOpenHistory = onOpenHistory,
         onMove = viewModel::moveGoal,
         onCommitOrder = viewModel::commitOrder,
         onCancelReorder = viewModel::cancelReorder,
@@ -74,6 +77,7 @@ private fun TodayContent(
     onToggle: (GoalStatus) -> Unit,
     onOpenGoal: (String) -> Unit,
     onCreateGoal: () -> Unit,
+    onOpenHistory: () -> Unit,
     onMove: (String, String) -> Boolean,
     onCommitOrder: () -> Unit,
     onCancelReorder: () -> Unit,
@@ -105,11 +109,21 @@ private fun TodayContent(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item(key = HEADER_KEY) {
-                Text(
-                    text = stringResource(R.string.today_title).displayUppercase(),
-                    style = MaterialTheme.typography.displaySmall.condensed(),
-                    color = colors.ink,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_title).displayUppercase(),
+                        style = MaterialTheme.typography.displaySmall.condensed(),
+                        color = colors.ink,
+                    )
+                    NeoOutlineButton(
+                        text = stringResource(R.string.action_history),
+                        onClick = onOpenHistory,
+                    )
+                }
             }
 
             if (state.hasNoGoals) {

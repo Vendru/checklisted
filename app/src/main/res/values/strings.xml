@@ -48,6 +48,25 @@
     <string name="action_unarchive">Desarquivar</string>
     <string name="action_back">Voltar</string>
 
+    <!-- Detalhe da meta -->
+    <string name="stat_current_streak">Sequência</string>
+    <string name="stat_best_streak">Recorde</string>
+    <string name="stat_rate_daily">Últimos 30 dias</string>
+    <string name="stat_rate_weekly">Últimas 4 semanas</string>
+    <string name="stat_rate_monthly">Últimos 3 meses</string>
+    <string name="detail_heatmap_title">Últimos 3 meses</string>
+    <string name="detail_heatmap_hint">Toque num quadrado para marcar ou desmarcar aquele período.</string>
+    <string name="action_edit">Editar</string>
+
+    <!-- Histórico -->
+    <string name="history_title">Histórico</string>
+    <string name="action_history">Histórico</string>
+    <string name="action_close">Fechar</string>
+    <string name="history_hint">Quanto mais cheio o quadrado, mais metas você concluiu naquele dia.</string>
+    <string name="history_day_hint">Marque o que ficou para trás. Metas semanais e mensais valem para o período inteiro.</string>
+    <string name="empty_history_title">Sem histórico ainda</string>
+    <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
+
     <!-- Cores -->
     <string name="color_yellow">Amarelo</string>
     <string name="color_pink">Rosa</string>

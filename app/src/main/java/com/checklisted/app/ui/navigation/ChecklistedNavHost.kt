@@ -8,7 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.checklisted.app.ui.goal.GoalDetailScreen
 import com.checklisted.app.ui.goal.GoalEditorScreen
+import com.checklisted.app.ui.history.HistoryScreen
 import com.checklisted.app.ui.today.TodayScreen
 
 sealed interface Destination {
@@ -16,6 +18,18 @@ sealed interface Destination {
 
     data object Today : Destination {
         override val route: String = "today"
+    }
+
+    /** Stats and heatmap for one goal. */
+    data object GoalDetail : Destination {
+        const val ARG_GOAL_ID = "goalId"
+        override val route: String = "goal/{$ARG_GOAL_ID}"
+
+        fun of(goalId: String): String = "goal/$goalId"
+    }
+
+    data object History : Destination {
+        override val route: String = "history"
     }
 
     /**
@@ -26,11 +40,11 @@ sealed interface Destination {
      */
     data object GoalEditor : Destination {
         const val ARG_GOAL_ID = "goalId"
-        override val route: String = "goal?$ARG_GOAL_ID={$ARG_GOAL_ID}"
+        override val route: String = "editor?$ARG_GOAL_ID={$ARG_GOAL_ID}"
 
-        fun create(): String = "goal"
+        fun create(): String = "editor"
 
-        fun edit(goalId: String): String = "goal?$ARG_GOAL_ID=$goalId"
+        fun edit(goalId: String): String = "editor?$ARG_GOAL_ID=$goalId"
     }
 }
 
@@ -47,8 +61,25 @@ fun ChecklistedNavHost(
         composable(Destination.Today.route) {
             TodayScreen(
                 onCreateGoal = { navController.navigate(Destination.GoalEditor.create()) },
-                onOpenGoal = { goalId -> navController.navigate(Destination.GoalEditor.edit(goalId)) },
+                onOpenGoal = { goalId -> navController.navigate(Destination.GoalDetail.of(goalId)) },
+                onOpenHistory = { navController.navigate(Destination.History.route) },
             )
+        }
+
+        composable(
+            route = Destination.GoalDetail.route,
+            arguments = listOf(
+                navArgument(Destination.GoalDetail.ARG_GOAL_ID) { type = NavType.StringType },
+            ),
+        ) {
+            GoalDetailScreen(
+                onBack = { navController.popBackStack() },
+                onEdit = { goalId -> navController.navigate(Destination.GoalEditor.edit(goalId)) },
+            )
+        }
+
+        composable(Destination.History.route) {
+            HistoryScreen(onBack = { navController.popBackStack() })
         }
 
         composable(
