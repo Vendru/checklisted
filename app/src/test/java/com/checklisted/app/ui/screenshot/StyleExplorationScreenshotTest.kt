@@ -1,5 +1,6 @@
 package com.checklisted.app.ui.screenshot
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +29,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -286,6 +289,24 @@ class StyleExplorationScreenshotTest {
         paparazzi.snapshot(name = name) { SampleToday(spec) }
     }
 
+    private fun renderScreen(
+        name: String,
+        spec: StyleSpec,
+        screen: @Composable (StyleSpec) -> Unit,
+    ) {
+        paparazzi.snapshot(name = name) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(spec.bg)
+                    .padding(horizontal = 20.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(spec.gap),
+            ) {
+                screen(spec)
+            }
+        }
+    }
+
     @Test fun current() = render("0-atual-neobrutalista", neo)
 
     @Test fun paperCalmLight() = render("a-papel-calmo-claro", paperLight)
@@ -305,6 +326,30 @@ class StyleExplorationScreenshotTest {
     @Test fun editorialWithSurface() = render("f-editorial-com-superficie", editorialSurface)
 
     @Test fun expressiveTonal() = render("g-tonal-expressivo", expressive)
+
+    // The other three screens, so a direction can be judged on more than one list.
+
+    @Test fun detailTamedLight() = renderScreen("detalhe-e-domado-claro", tamedLight) { SampleDetail(it) }
+
+    @Test fun detailTamedDark() = renderScreen("detalhe-e-domado-escuro", tamedDark) { SampleDetail(it) }
+
+    @Test fun detailEditorial() = renderScreen("detalhe-f-editorial", editorialSurface) { SampleDetail(it) }
+
+    @Test fun detailExpressive() = renderScreen("detalhe-g-expressivo", expressive) { SampleDetail(it) }
+
+    @Test fun historyTamedLight() = renderScreen("historico-e-domado-claro", tamedLight) { SampleHistory(it) }
+
+    @Test fun historyTamedDark() = renderScreen("historico-e-domado-escuro", tamedDark) { SampleHistory(it) }
+
+    @Test fun historyEditorial() = renderScreen("historico-f-editorial", editorialSurface) { SampleHistory(it) }
+
+    @Test fun historyExpressive() = renderScreen("historico-g-expressivo", expressive) { SampleHistory(it) }
+
+    @Test fun settingsTamedLight() = renderScreen("config-e-domado-claro", tamedLight) { SampleSettings(it) }
+
+    @Test fun settingsEditorial() = renderScreen("config-f-editorial", editorialSurface) { SampleSettings(it) }
+
+    @Test fun settingsExpressive() = renderScreen("config-g-expressivo", expressive) { SampleSettings(it) }
 
     // region the mock screen
 
@@ -524,6 +569,252 @@ class StyleExplorationScreenshotTest {
                 .then(
                     if (spec.border > 0.dp) Modifier.border(spec.border, spec.divider, shape) else Modifier,
                 )
+    }
+
+    // region the other screens
+
+    @Composable
+    private fun ScreenHeader(spec: StyleSpec, title: String) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(bottom = spec.gap),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .surface(spec, RoundedCornerShape(spec.radius), fill = spec.surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(16.dp)) {
+                    val path = Path().apply {
+                        moveTo(size.width * 0.66f, 0f)
+                        lineTo(size.width * 0.28f, size.height * 0.5f)
+                        lineTo(size.width * 0.66f, size.height)
+                    }
+                    drawPath(
+                        path = path,
+                        color = spec.text,
+                        style = Stroke(2.dp.toPx(), cap = StrokeCap.Square, join = StrokeJoin.Miter),
+                    )
+                }
+            }
+            Text(
+                text = spec.label(title),
+                style = TextStyle(
+                    fontFamily = spec.display,
+                    fontSize = (spec.displaySize - 6).sp,
+                    fontWeight = if (spec.display == FontFamily.SansSerif) FontWeight.Bold else FontWeight.Normal,
+                    color = spec.text,
+                ),
+            )
+        }
+    }
+
+    @Composable
+    private fun SampleDetail(spec: StyleSpec) {
+        ScreenHeader(spec, "Correr 5 km")
+        Text(
+            text = "Três vezes por semana, sem negociar com o sono.",
+            style = TextStyle(fontFamily = spec.body, fontSize = 14.sp, color = spec.secondary),
+            modifier = Modifier.padding(bottom = spec.gap),
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(spec.gap),
+        ) {
+            Stat(spec, "12", "Sequência", filled = true, modifier = Modifier.weight(1f))
+            Stat(spec, "31", "Recorde", filled = false, modifier = Modifier.weight(1f))
+            Stat(spec, "73%", "Últimos 30 dias", filled = false, modifier = Modifier.weight(1f))
+        }
+        SectionLabel(spec, "Últimos 3 meses", top = spec.gap)
+        Heatmap(spec)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = spec.gap)
+                .surface(spec, RoundedCornerShape(spec.radius), fill = spec.surface)
+                .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = spec.label("Editar"),
+                style = TextStyle(
+                    fontFamily = spec.body,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = spec.text,
+                ),
+            )
+        }
+    }
+
+    @Composable
+    private fun SampleHistory(spec: StyleSpec) {
+        ScreenHeader(spec, "Histórico")
+        Text(
+            text = "Quanto mais cheio o quadrado, mais metas você concluiu naquele dia.",
+            style = TextStyle(fontFamily = spec.body, fontSize = 14.sp, color = spec.secondary),
+            modifier = Modifier.padding(bottom = spec.gap),
+        )
+        Heatmap(spec)
+        Row(
+            modifier = Modifier.padding(top = spec.gap),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "menos",
+                style = TextStyle(fontFamily = spec.body, fontSize = 12.sp, color = spec.secondary),
+            )
+            listOf(0f, 0.35f, 0.7f, 1f).forEach { level ->
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .background(cell(spec, level), RoundedCornerShape(cellRadius(spec)))
+                        .border(1.dp, spec.divider, RoundedCornerShape(cellRadius(spec))),
+                )
+            }
+            Text(
+                text = "mais",
+                style = TextStyle(fontFamily = spec.body, fontSize = 12.sp, color = spec.secondary),
+            )
+        }
+    }
+
+    @Composable
+    private fun SampleSettings(spec: StyleSpec) {
+        ScreenHeader(spec, "Configurações")
+        SettingsBlock(spec, "Início da semana", "Muda como as metas semanais são agrupadas.") {
+            Chip(spec, "Segunda", selected = true)
+            Chip(spec, "Domingo", selected = false)
+        }
+        SettingsBlock(spec, "Tema", null) {
+            Chip(spec, "Sistema", selected = true)
+            Chip(spec, "Claro", selected = false)
+            Chip(spec, "Escuro", selected = false)
+        }
+        SettingsBlock(spec, "Lembrete diário", "Só toca se ainda faltar alguma coisa.") {
+            Chip(spec, "18:00", selected = false)
+            Chip(spec, "20:00", selected = true)
+            Chip(spec, "22:00", selected = false)
+        }
+    }
+
+    @Composable
+    private fun SettingsBlock(
+        spec: StyleSpec,
+        title: String,
+        hint: String?,
+        content: @Composable () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .surface(spec, RoundedCornerShape(spec.radius), fill = spec.surface)
+                .padding(spec.rowPadding),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = spec.label(title),
+                style = TextStyle(
+                    fontFamily = spec.body,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = spec.text,
+                ),
+            )
+            if (hint != null) {
+                Text(
+                    text = hint,
+                    style = TextStyle(fontFamily = spec.body, fontSize = 13.sp, color = spec.secondary),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+        }
+    }
+
+    @Composable
+    private fun Chip(spec: StyleSpec, label: String, selected: Boolean) {
+        val shape = RoundedCornerShape(if (spec.radius > 12.dp) 20.dp else spec.radius)
+        Box(
+            modifier = Modifier
+                .background(if (selected) spec.accent else Color.Transparent, shape)
+                .border(
+                    width = if (spec.border > 0.dp) spec.border else 1.dp,
+                    color = if (selected) spec.accent else spec.divider,
+                    shape = shape,
+                )
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+        ) {
+            Text(
+                text = label,
+                style = TextStyle(
+                    fontFamily = spec.body,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (selected) spec.onAccent else spec.text,
+                ),
+            )
+        }
+    }
+
+    @Composable
+    private fun SectionLabel(spec: StyleSpec, text: String, top: Dp = 0.dp) {
+        Text(
+            text = spec.label(text),
+            style = TextStyle(
+                fontFamily = spec.body,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = spec.text,
+            ),
+            modifier = Modifier.padding(top = top),
+        )
+    }
+
+    /**
+     * Eight weeks rather than the real twelve, so a whole screen fits in one frame
+     * and the directions can be compared. The app itself scrolls.
+     */
+    @Composable
+    private fun Heatmap(spec: StyleSpec) {
+        val pattern = listOf(1f, 0.7f, 0f, 0.35f, 1f, 1f, 0.7f, 0f, 0f, 0.35f, 1f, 0.7f, 1f, 0f)
+        val shape = RoundedCornerShape(cellRadius(spec))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            repeat(8) { week ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    repeat(7) { day ->
+                        val i = week * 7 + day
+                        val level = if (i < 5) 0f else pattern[i % pattern.size]
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .background(cell(spec, level), shape)
+                                .border(1.dp, spec.divider, shape),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun cellRadius(spec: StyleSpec): Dp = when {
+        spec.radius >= 20.dp -> 8.dp
+        spec.radius >= 10.dp -> 4.dp
+        else -> spec.radius
+    }
+
+    private fun cell(spec: StyleSpec, level: Float): Color = when {
+        level <= 0f -> spec.track
+        level >= 1f -> spec.accent
+        else -> lerp(spec.track, spec.accent, level)
     }
 
     // endregion
