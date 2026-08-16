@@ -8,9 +8,12 @@ import androidx.room.Room
 import com.checklisted.app.data.local.ChecklistedDatabase
 import com.checklisted.app.data.local.CompletionDao
 import com.checklisted.app.data.local.GoalDao
+import com.checklisted.app.data.period.PeriodClock
 import com.checklisted.app.data.prefs.SettingsRepositoryImpl
 import com.checklisted.app.data.repository.CompletionRepositoryImpl
 import com.checklisted.app.data.repository.GoalRepositoryImpl
+import com.checklisted.app.domain.period.TodayClock
+import com.checklisted.app.domain.period.ZoneProvider
 import com.checklisted.app.domain.repository.CompletionRepository
 import com.checklisted.app.domain.repository.GoalRepository
 import com.checklisted.app.domain.repository.SettingsRepository
@@ -61,12 +64,8 @@ object DataModule {
     @Provides
     fun provideClock(): Clock = Clock.systemDefaultZone()
 
-    /**
-     * Resolved per call, not cached: the user can cross a timezone mid-session and
-     * the day boundary has to follow them.
-     */
     @Provides
-    fun provideZoneIdProvider(): () -> ZoneId = { ZoneId.systemDefault() }
+    fun provideZoneProvider(): ZoneProvider = ZoneProvider { ZoneId.systemDefault() }
 }
 
 @Module
@@ -80,4 +79,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    abstract fun bindTodayClock(impl: PeriodClock): TodayClock
 }
