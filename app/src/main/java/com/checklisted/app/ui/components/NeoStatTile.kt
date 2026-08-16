@@ -2,8 +2,11 @@ package com.checklisted.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +34,8 @@ fun NeoStatTile(
     label: String,
     modifier: Modifier = Modifier,
     color: Color = NeoTheme.colors.surface,
+    contentColor: Color = NeoTheme.colors.ink,
 ) {
-    val colors = NeoTheme.colors
     val spoken = "$label: $value"
 
     NeoCard(
@@ -43,12 +46,12 @@ fun NeoStatTile(
         Text(
             text = value,
             style = MaterialTheme.typography.displaySmall.condensed(),
-            color = colors.ink,
+            color = contentColor,
         )
         Text(
             text = label.displayUppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = colors.ink,
+            color = contentColor,
         )
     }
 }
@@ -63,25 +66,38 @@ fun NeoStatRow(
     modifier: Modifier = Modifier,
     accent: NeoAccent = NeoAccent.Default,
 ) {
+    // IntrinsicSize.Min so all three match the tallest: the rate label wraps to two
+    // lines on some recurrences, and ragged bottoms read as a mistake.
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         NeoStatTile(
             value = currentStreak.toString(),
             label = stringResource(R.string.stat_current_streak),
             color = accent.color,
-            modifier = Modifier.weight(1f),
+            // The tile is filled with the accent, so its text follows the accent's
+            // contrast colour rather than the page ink.
+            contentColor = NeoTheme.colors.onAccent,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
         )
         NeoStatTile(
             value = bestStreak.toString(),
             label = stringResource(R.string.stat_best_streak),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
         )
         NeoStatTile(
             value = "$ratePercent%",
             label = rateLabel,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
         )
     }
 }

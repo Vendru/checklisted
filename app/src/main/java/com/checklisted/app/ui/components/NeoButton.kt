@@ -34,13 +34,12 @@ fun NeoButton(
     enabled: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val colors = NeoTheme.colors
     NeoButtonBody(
         text = text,
         onClick = onClick,
         modifier = modifier,
-        fill = if (enabled) accent.color else colors.surfaceMuted,
-        contentColor = if (enabled) colors.onAccent else colors.ink,
+        fill = accent.color,
+        contentColor = NeoTheme.colors.onAccent,
         enabled = enabled,
         leadingIcon = leadingIcon,
     )
@@ -83,6 +82,7 @@ private fun NeoButtonBody(
     enabled: Boolean,
     leadingIcon: (@Composable () -> Unit)?,
 ) {
+    val colors = NeoTheme.colors
     val interactionSource = rememberNeoInteractionSource()
     val pressed by interactionSource.collectIsPressedAsState()
 
@@ -104,7 +104,9 @@ private fun NeoButtonBody(
         Text(
             text = text.displayUppercase(),
             style = MaterialTheme.typography.labelLarge,
-            color = contentColor,
+            // Disabled swaps the fill to a neutral, so the label follows the ink
+            // rather than the accent's contrast colour.
+            color = if (enabled) contentColor else colors.ink.copy(alpha = NeoTokens.DISABLED_CONTENT_ALPHA),
         )
     }
 }

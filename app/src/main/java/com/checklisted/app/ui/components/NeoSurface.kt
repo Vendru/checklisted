@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -86,16 +85,19 @@ fun Modifier.neoSurface(
     shadowColor: Color = NeoTheme.colors.shadow,
     borderWidth: Dp = NeoTokens.BorderWidth,
     shadowOffset: Dp = NeoTokens.ShadowOffset,
+    disabledColor: Color = NeoTheme.colors.surfaceDisabled,
 ): Modifier {
     val travel by animateDpAsState(
         targetValue = if (pressed && enabled) shadowOffset else 0.dp,
         animationSpec = tween(durationMillis = 40, easing = LinearEasing),
         label = "neoPressTravel",
     )
+    // Disabled swaps the fill and keeps the border and shadow at full strength.
+    // Fading the whole component would wash the ink to grey, which reads as the
+    // low-contrast state this design has no room for.
+    val fill = if (enabled) color else disabledColor
+
     return this
-        // Covers fill, border and shadow alike, because everything below this node
-        // is drawn into the same layer.
-        .alpha(if (enabled) 1f else NeoTokens.DISABLED_ALPHA)
         .reserveShadowGutter(shadowOffset)
         .drawWithCache {
             // Cached per size/shape rather than rebuilt on every draw pass — the
@@ -114,7 +116,7 @@ fun Modifier.neoSurface(
                 }
             }
         }
-        .background(color = color, shape = shape)
+        .background(color = fill, shape = shape)
         .border(width = borderWidth, color = borderColor, shape = shape)
 }
 

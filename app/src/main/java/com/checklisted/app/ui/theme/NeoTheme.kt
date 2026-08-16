@@ -28,8 +28,13 @@ object NeoTokens {
 
     val MinTouchTarget = 48.dp
 
-    /** Applied to the entire component — fill, border and shadow — when disabled. */
-    const val DISABLED_ALPHA = 0.45f
+    /**
+     * Applied to a disabled component's *content* only.
+     *
+     * The fill switches to `surfaceDisabled` and the border and shadow stay at full
+     * strength, so a disabled control still reads as part of this design system.
+     */
+    const val DISABLED_CONTENT_ALPHA = 0.55f
 }
 
 val LocalNeoColors = staticCompositionLocalOf { NeoLightColors }

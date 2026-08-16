@@ -12,10 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,27 +76,23 @@ private fun EmptyBoxMark(accent: NeoAccent) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Canvas(modifier = Modifier.size(44.dp)) {
-            // A dashed, unfinished tick: the box is waiting to be filled in.
+            // The same tick geometry NeoCheckbox draws, with the long leg left as
+            // dashes: the box is half-drawn, waiting to be finished.
             val w = size.width
             val h = size.height
             val stroke = NeoTokens.BorderWidth.toPx()
-            val tick = Path().apply {
-                moveTo(w * 0.18f, h * 0.52f)
-                lineTo(w * 0.42f, h * 0.76f)
-            }
-            drawPath(
-                path = tick,
-                color = colors.onAccent,
-                style = Stroke(stroke, cap = StrokeCap.Square, join = StrokeJoin.Miter),
+            val start = Offset(w * 0.20f, h * 0.50f)
+            val elbow = Offset(w * 0.42f, h * 0.74f)
+            val end = Offset(w * 0.82f, h * 0.24f)
+
+            drawLine(colors.onAccent, start, elbow, stroke, StrokeCap.Square)
+
+            fun along(t: Float) = Offset(
+                x = elbow.x + (end.x - elbow.x) * t,
+                y = elbow.y + (end.y - elbow.y) * t,
             )
-            listOf(0.55f, 0.72f, 0.89f).forEach { fraction ->
-                drawLine(
-                    color = colors.onAccent,
-                    start = Offset(w * fraction, h * (0.76f - (fraction - 0.42f))),
-                    end = Offset(w * (fraction + 0.07f), h * (0.69f - (fraction - 0.42f))),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Square,
-                )
+            listOf(0.04f to 0.24f, 0.44f to 0.64f, 0.84f to 1f).forEach { (from, to) ->
+                drawLine(colors.onAccent, along(from), along(to), stroke, StrokeCap.Square)
             }
         }
     }

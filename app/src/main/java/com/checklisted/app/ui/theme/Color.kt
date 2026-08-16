@@ -21,6 +21,12 @@ val NeoBone = Color(0xFFF2ECDC)
 val NeoNight = Color(0xFF14120F)
 val NeoNightSurface = Color(0xFF221F1A)
 
+// Disabled fills. Flat, clearly "off", and still high contrast against the ink —
+// fading the whole component instead would produce exactly the low-contrast grey
+// the design forbids.
+val NeoStoneLight = Color(0xFFDDD6C4)
+val NeoStoneDark = Color(0xFF3A352D)
+
 /**
  * Accent slots a goal can be tagged with. Persisted by [name], so entries must
  * keep their identifiers stable across releases.
@@ -51,6 +57,7 @@ data class NeoColors(
     val background: Color,
     val surface: Color,
     val surfaceMuted: Color,
+    val surfaceDisabled: Color,
     val ink: Color,
     val onAccent: Color,
     val shadow: Color,
@@ -61,6 +68,7 @@ val NeoLightColors = NeoColors(
     background = NeoCream,
     surface = NeoWhite,
     surfaceMuted = NeoCream,
+    surfaceDisabled = NeoStoneLight,
     ink = NeoBlack,
     onAccent = NeoBlack,
     shadow = NeoBlack,
@@ -71,6 +79,7 @@ val NeoDarkColors = NeoColors(
     background = NeoNight,
     surface = NeoNightSurface,
     surfaceMuted = NeoNight,
+    surfaceDisabled = NeoStoneDark,
     ink = NeoBone,
     onAccent = NeoBlack,
     shadow = NeoBone,
