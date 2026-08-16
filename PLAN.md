@@ -139,7 +139,7 @@ commit e um resumo para você antes de eu seguir.
 > já que um dia agrega várias metas e um toque só seria ambíguo. No heatmap do
 > detalhe, o toque marca direto — ali só existe uma meta.
 
-### Fase 5 — Lembretes + polimento
+### Fase 5 — Lembretes + polimento ✅
 
 - `DataStore`: horário do lembrete, início da semana, modo de tema
 - Tela de Configurações
@@ -149,21 +149,35 @@ commit e um resumo para você antes de eu seguir.
   zero warning novo de compilação
 - **Entregável:** definição de pronto cumprida
 
+> O lembrete é um one-shot que se reagenda, **não** um `PeriodicWorkRequest`:
+> um periódico repete a cada 24 horas fixas, o que desloca o horário escolhido
+> em uma hora sempre que o relógio muda. Recalcular a próxima ocorrência local
+> após cada disparo o mantém preso ao relógio de parede.
+>
+> Ele só notifica se ainda houver meta em aberto — a contagem existe para poder
+> ficar calado.
+>
+> Reordenar por arraste é inalcançável com leitor de tela, então a mesma
+> reordenação está exposta como ações customizadas de acessibilidade.
+
 ---
 
 ## Definição de pronto
 
-Estado após a Fase 4:
+Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 94 testes
+- [x] `./gradlew test` passando — 110 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
-Não verificado: **aparência**. O container não tem KVM, então não há emulador, e
-previews do Compose não renderizam headless. O visual só foi validado por leitura
-de código.
+`./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
+
+Não verificado: **aparência e comportamento em dispositivo**. O container não tem
+KVM, então não há emulador, e previews do Compose não renderizam headless. Isso
+deixa sem validação prática: o visual em geral, o gesto de arraste (incluindo a
+rolagem automática), o disparo real do WorkManager e a notificação.
 
 ---
 
