@@ -14,9 +14,11 @@ import com.checklisted.app.data.repository.CompletionRepositoryImpl
 import com.checklisted.app.data.repository.GoalRepositoryImpl
 import com.checklisted.app.domain.period.TodayClock
 import com.checklisted.app.domain.period.ZoneProvider
+import com.checklisted.app.domain.reminder.ReminderPlanner
 import com.checklisted.app.domain.repository.CompletionRepository
 import com.checklisted.app.domain.repository.GoalRepository
 import com.checklisted.app.domain.repository.SettingsRepository
+import com.checklisted.app.work.ReminderScheduler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -82,4 +84,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindTodayClock(impl: PeriodClock): TodayClock
+
+    @Binds
+    abstract fun bindReminderPlanner(impl: ReminderScheduler): ReminderPlanner
 }

@@ -11,29 +11,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
 
-/** Square icon button used as the up affordance on every secondary screen. */
+/**
+ * Square icon button, sized to the minimum touch target.
+ *
+ * Icon-only, so [contentDescription] is the node's whole accessible name and is
+ * required rather than optional.
+ */
 @Composable
-fun NeoBackButton(
+fun NeoIconButton(
     onClick: () -> Unit,
+    contentDescription: String,
     modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit,
 ) {
     val interactionSource = rememberNeoInteractionSource()
     val pressed by interactionSource.collectIsPressedAsState()
-    val label = stringResource(R.string.action_back)
 
     Row(
         modifier = modifier
             .neoSurface(color = NeoTheme.colors.surface, shape = NeoShapes.small, pressed = pressed)
             .neoClickable(interactionSource = interactionSource, onClick = onClick)
             .size(NeoTokens.MinTouchTarget)
-            .semantics { contentDescription = label },
+            .semantics { this.contentDescription = contentDescription },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon()
+    }
+}
+
+/** The up affordance on every secondary screen. */
+@Composable
+fun NeoBackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    NeoIconButton(
+        onClick = onClick,
+        contentDescription = stringResource(R.string.action_back),
+        modifier = modifier,
     ) {
         NeoIconBack()
     }
@@ -41,8 +63,11 @@ fun NeoBackButton(
 
 @NeoPreviews
 @Composable
-private fun NeoBackButtonPreview() {
+private fun NeoIconButtonPreview() {
     PreviewStack {
-        NeoBackButton(onClick = {})
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            NeoBackButton(onClick = {})
+            NeoIconButton(onClick = {}, contentDescription = "Configurações") { NeoIconSettings() }
+        }
     }
 }

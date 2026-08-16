@@ -79,6 +79,29 @@ fun NeoIconDrag(
     }
 }
 
+/** A gear reduced to a ring and four teeth — legible at 22.dp, unlike a real gear. */
+@Composable
+fun NeoIconSettings(
+    modifier: Modifier = Modifier,
+    tint: Color = NeoTheme.colors.ink,
+    size: Dp = DefaultIconSize,
+) {
+    NeoIcon(modifier, size) {
+        val w = this.size.width
+        val h = this.size.height
+        val stroke = DefaultStroke.toPx()
+        drawCircle(color = tint, radius = w * 0.26f, style = Stroke(stroke))
+        listOf(
+            Offset(w * 0.5f, 0f) to Offset(w * 0.5f, h * 0.16f),
+            Offset(w * 0.5f, h * 0.84f) to Offset(w * 0.5f, h),
+            Offset(0f, h * 0.5f) to Offset(w * 0.16f, h * 0.5f),
+            Offset(w * 0.84f, h * 0.5f) to Offset(w, h * 0.5f),
+        ).forEach { (start, end) ->
+            drawLine(tint, start, end, stroke, StrokeCap.Square)
+        }
+    }
+}
+
 @Composable
 private fun NeoIcon(modifier: Modifier, size: Dp, draw: DrawScope.() -> Unit) {
     Canvas(modifier = modifier.size(size)) { draw() }
@@ -92,6 +115,7 @@ private fun NeoIconsPreview() {
             NeoIconPlus()
             NeoIconBack()
             NeoIconDrag()
+            NeoIconSettings()
         }
     }
 }

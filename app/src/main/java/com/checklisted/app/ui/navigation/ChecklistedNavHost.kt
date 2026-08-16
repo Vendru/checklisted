@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.checklisted.app.ui.goal.GoalDetailScreen
 import com.checklisted.app.ui.goal.GoalEditorScreen
 import com.checklisted.app.ui.history.HistoryScreen
+import com.checklisted.app.ui.settings.SettingsScreen
 import com.checklisted.app.ui.today.TodayScreen
 
 sealed interface Destination {
@@ -30,6 +31,10 @@ sealed interface Destination {
 
     data object History : Destination {
         override val route: String = "history"
+    }
+
+    data object Settings : Destination {
+        override val route: String = "settings"
     }
 
     /**
@@ -63,6 +68,7 @@ fun ChecklistedNavHost(
                 onCreateGoal = { navController.navigate(Destination.GoalEditor.create()) },
                 onOpenGoal = { goalId -> navController.navigate(Destination.GoalDetail.of(goalId)) },
                 onOpenHistory = { navController.navigate(Destination.History.route) },
+                onOpenSettings = { navController.navigate(Destination.Settings.route) },
             )
         }
 
@@ -80,6 +86,10 @@ fun ChecklistedNavHost(
 
         composable(Destination.History.route) {
             HistoryScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Destination.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(

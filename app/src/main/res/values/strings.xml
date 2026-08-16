@@ -67,6 +67,32 @@
     <string name="empty_history_title">Sem histórico ainda</string>
     <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
 
+    <!-- Configurações -->
+    <string name="settings_title">Configurações</string>
+    <string name="action_settings">Configurações</string>
+    <string name="settings_week_start">Início da semana</string>
+    <string name="settings_week_start_hint">Muda como as metas semanais são agrupadas. Nada é apagado — o histórico é relido pela nova fronteira.</string>
+    <string name="week_start_monday">Segunda</string>
+    <string name="week_start_sunday">Domingo</string>
+    <string name="settings_theme">Tema</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="settings_reminder">Lembrete diário</string>
+    <string name="settings_reminder_hint">Um toque no fim do dia, só se ainda faltar alguma coisa.</string>
+    <string name="settings_reminder_enable">Ativar lembrete</string>
+    <string name="settings_reminder_time">Horário</string>
+    <string name="settings_reminder_permission_denied">Sem permissão de notificação, o lembrete não aparece. Dá para liberar nos ajustes do sistema.</string>
+
+    <!-- Notificação -->
+    <string name="notification_channel_name">Lembrete diário</string>
+    <string name="notification_channel_description">Um aviso no horário que você escolher, quando ainda houver metas em aberto.</string>
+    <string name="notification_title">Ainda dá tempo</string>
+    <plurals name="notification_pending">
+        <item quantity="one">Falta %1$d meta para hoje.</item>
+        <item quantity="other">Faltam %1$d metas para hoje.</item>
+    </plurals>
+
     <!-- Cores -->
     <string name="color_yellow">Amarelo</string>
     <string name="color_pink">Rosa</string>
@@ -76,6 +102,8 @@
 
     <!-- Acessibilidade -->
     <string name="a11y_reorder_hint">Segure e arraste para reordenar</string>
+    <string name="a11y_move_up">Mover para cima</string>
+    <string name="a11y_move_down">Mover para baixo</string>
 
     <!-- Amostras -->
     <string name="sample_goal_title">Beber 2L de água</string>
