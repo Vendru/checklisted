@@ -48,9 +48,19 @@ class ReorderState internal constructor(
     }
 
     fun onDrag(delta: Float) {
-        val key = draggedKey ?: return
+        if (draggedKey == null) return
         draggedDistance += delta
+        checkForSwap()
+    }
 
+    /**
+     * Moves the row into a neighbour's slot once its centre has crossed into one.
+     *
+     * Also called while auto-scrolling: the finger can be perfectly still and still
+     * need to swap, because the list is moving underneath it.
+     */
+    fun checkForSwap() {
+        val key = draggedKey ?: return
         val top = draggedOrigin + draggedDistance
         val centre = (top + draggedSize / 2f).toInt()
 
@@ -65,6 +75,43 @@ class ReorderState internal constructor(
         // the same point of the row instead of the row jumping out from under it.
         draggedOrigin = target.offset
         draggedDistance = top - target.offset
+    }
+
+    /**
+     * How far the list should scroll this frame, in pixels.
+     *
+     * Non-zero once the dragged row reaches within one row-height of either edge of
+     * the viewport, and proportional to how far past that threshold it is, so nudging
+     * the edge crawls and pinning the row to it moves fast.
+     */
+    fun autoScrollDelta(): Float {
+        if (draggedKey == null) return 0f
+        val info = listState.layoutInfo
+        val top = draggedOrigin + draggedDistance
+        val bottom = top + draggedSize
+        val threshold = draggedSize.toFloat()
+
+        val lowerBound = info.viewportEndOffset - threshold
+        val upperBound = info.viewportStartOffset + threshold
+
+        return when {
+            bottom > lowerBound -> (bottom - lowerBound).coerceAtMost(MAX_SCROLL_PER_FRAME)
+            top < upperBound -> (top - upperBound).coerceAtLeast(-MAX_SCROLL_PER_FRAME)
+            else -> 0f
+        }
+    }
+
+    /**
+     * Compensates for a scroll the drag itself caused.
+     *
+     * Scrolling moves every slot, including the dragged row's. Shifting the origin
+     * and the distance by the same amount in opposite directions leaves the row
+     * painted exactly where the finger is holding it.
+     */
+    fun onAutoScrolled(consumed: Float) {
+        if (draggedKey == null || consumed == 0f) return
+        draggedOrigin -= consumed.toInt()
+        draggedDistance += consumed
     }
 
     fun onDragEnd() {
@@ -86,6 +133,11 @@ class ReorderState internal constructor(
 
     private fun visibleItem(key: String) =
         listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == key }
+
+    private companion object {
+        /** Caps the speed so a fast drag cannot fling the list past its target. */
+        const val MAX_SCROLL_PER_FRAME = 18f
+    }
 }
 
 @Composable

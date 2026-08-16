@@ -1,6 +1,7 @@
 package com.checklisted.app.ui.today
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,12 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -35,7 +38,9 @@ import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.ui.components.NeoButton
 import com.checklisted.app.ui.components.NeoEmptyState
+import com.checklisted.app.ui.components.NeoIconButton
 import com.checklisted.app.ui.components.NeoIconPlus
+import com.checklisted.app.ui.components.NeoIconSettings
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.ReorderState
@@ -45,12 +50,14 @@ import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.condensed
 import com.checklisted.app.ui.theme.displayUppercase
+import kotlinx.coroutines.isActive
 
 @Composable
 fun TodayScreen(
     onCreateGoal: () -> Unit,
     onOpenGoal: (String) -> Unit,
     onOpenHistory: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -64,6 +71,7 @@ fun TodayScreen(
         onOpenGoal = onOpenGoal,
         onCreateGoal = onCreateGoal,
         onOpenHistory = onOpenHistory,
+        onOpenSettings = onOpenSettings,
         onMove = viewModel::moveGoal,
         onCommitOrder = viewModel::commitOrder,
         onCancelReorder = viewModel::cancelReorder,
@@ -78,6 +86,7 @@ private fun TodayContent(
     onOpenGoal: (String) -> Unit,
     onCreateGoal: () -> Unit,
     onOpenHistory: () -> Unit,
+    onOpenSettings: () -> Unit,
     onMove: (String, String) -> Boolean,
     onCommitOrder: () -> Unit,
     onCancelReorder: () -> Unit,
@@ -92,6 +101,20 @@ private fun TodayContent(
         onCommit = onCommitOrder,
         onCancel = onCancelReorder,
     )
+
+    // Drives the list while a row is held against either edge of the viewport.
+    LaunchedEffect(reorderState.draggedKey) {
+        if (reorderState.draggedKey == null) return@LaunchedEffect
+        while (isActive) {
+            val delta = reorderState.autoScrollDelta()
+            if (delta != 0f) {
+                val consumed = listState.scrollBy(delta)
+                reorderState.onAutoScrolled(consumed)
+                reorderState.checkForSwap()
+            }
+            withFrameNanos { }
+        }
+    }
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -119,10 +142,18 @@ private fun TodayContent(
                         style = MaterialTheme.typography.displaySmall.condensed(),
                         color = colors.ink,
                     )
-                    NeoOutlineButton(
-                        text = stringResource(R.string.action_history),
-                        onClick = onOpenHistory,
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NeoOutlineButton(
+                            text = stringResource(R.string.action_history),
+                            onClick = onOpenHistory,
+                        )
+                        NeoIconButton(
+                            onClick = onOpenSettings,
+                            contentDescription = stringResource(R.string.action_settings),
+                        ) {
+                            NeoIconSettings()
+                        }
+                    }
                 }
             }
 
@@ -144,6 +175,9 @@ private fun TodayContent(
                         onToggle = onToggle,
                         onOpenGoal = onOpenGoal,
                         onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
+                        onReorder = { dragged, target ->
+                            if (onMove(dragged, target)) onCommitOrder()
+                        },
                     )
                 }
             }
@@ -170,6 +204,7 @@ private fun LazyListScope.todaySection(
     onToggle: (GoalStatus) -> Unit,
     onOpenGoal: (String) -> Unit,
     onDragStarted: () -> Unit,
+    onReorder: (String, String) -> Unit,
 ) {
     item(key = "header-${section.recurrence.name}") {
         SectionHeader(section = section)
@@ -186,13 +221,18 @@ private fun LazyListScope.todaySection(
         }
     }
 
-    items(items = section.goals, key = { it.goal.id }) { status ->
+    itemsIndexed(items = section.goals, key = { _, status -> status.goal.id }) { index, status ->
         val dragging = reorderState.draggedKey == status.goal.id
+        val previousId = section.goals.getOrNull(index - 1)?.goal?.id
+        val nextId = section.goals.getOrNull(index + 1)?.goal?.id
+
         GoalRow(
             status = status,
             isDragging = dragging,
             onToggle = { onToggle(status) },
             onOpen = { onOpenGoal(status.goal.id) },
+            onMoveUp = previousId?.let { target -> { onReorder(status.goal.id, target) } },
+            onMoveDown = nextId?.let { target -> { onReorder(status.goal.id, target) } },
             modifier = Modifier
                 .zIndex(if (dragging) 1f else 0f)
                 .dragOffset(reorderState.offsetFor(status.goal.id))

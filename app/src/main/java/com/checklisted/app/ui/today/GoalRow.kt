@@ -11,8 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.checklisted.app.R
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
@@ -35,13 +40,40 @@ fun GoalRow(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     isDragging: Boolean = false,
+    onMoveUp: (() -> Unit)? = null,
+    onMoveDown: (() -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
     val accent = NeoAccent.fromTag(status.goal.colorTag)
 
+    // Dragging is unreachable with a screen reader, so the same reordering is
+    // offered as custom actions. Without these the feature simply does not exist
+    // for those users.
+    val moveUpLabel = stringResource(R.string.a11y_move_up)
+    val moveDownLabel = stringResource(R.string.a11y_move_down)
+    val moveActions = buildList {
+        onMoveUp?.let {
+            add(
+                CustomAccessibilityAction(moveUpLabel) {
+                    it()
+                    true
+                },
+            )
+        }
+        onMoveDown?.let {
+            add(
+                CustomAccessibilityAction(moveDownLabel) {
+                    it()
+                    true
+                },
+            )
+        }
+    }
+
     NeoCard(
         modifier = modifier
             .fillMaxWidth()
+            .semantics { if (moveActions.isNotEmpty()) customActions = moveActions }
             .graphicsLayer {
                 // Lifts the dragged row off the stack. Scale only — the shadow is a
                 // hard offset and must not grow, or the row would look blurred.
