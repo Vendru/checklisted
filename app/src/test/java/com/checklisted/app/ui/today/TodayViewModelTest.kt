@@ -5,16 +5,13 @@ import com.checklisted.app.domain.model.Goal
 import com.checklisted.app.domain.model.PeriodKey
 import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.domain.model.WeekStart
-import com.checklisted.app.domain.period.TodayClock
-import com.checklisted.app.domain.repository.CompletionRepository
-import com.checklisted.app.domain.repository.GoalRepository
-import com.checklisted.app.domain.repository.SettingsRepository
+import com.checklisted.app.ui.FakeCompletionRepository
+import com.checklisted.app.ui.FakeGoalRepository
+import com.checklisted.app.ui.FakeSettingsRepository
+import com.checklisted.app.ui.FakeTodayClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -29,7 +26,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModelTest {
@@ -39,74 +35,13 @@ class TodayViewModelTest {
     private val today = LocalDate.parse("2026-08-16")
     private val clock: Clock = Clock.fixed(Instant.parse("2026-08-16T12:00:00Z"), ZoneId.of("UTC"))
 
-    private val goals = MutableStateFlow<List<Goal>>(emptyList())
-    private val completions = MutableStateFlow<List<Completion>>(emptyList())
-    private val weekStart = MutableStateFlow(WeekStart.MONDAY)
-    private var savedOrder: List<String>? = null
+    private val goalRepository = FakeGoalRepository()
+    private val completionRepository = FakeCompletionRepository()
+    private val settingsRepository = FakeSettingsRepository()
+    private val todayClock = FakeTodayClock(today)
 
-    private val goalRepository = object : GoalRepository {
-        override fun observeGoals(includeArchived: Boolean): Flow<List<Goal>> = goals
-
-        override fun observeGoal(id: String): Flow<Goal?> = goals.map { list -> list.find { it.id == id } }
-
-        override suspend fun createGoal(
-            title: String,
-            description: String?,
-            recurrence: Recurrence,
-            colorTag: String,
-        ): String = UUID.randomUUID().toString()
-
-        override suspend fun updateGoal(goal: Goal) = Unit
-
-        override suspend fun setArchived(id: String, archived: Boolean) {
-            goals.value = goals.value.filterNot { it.id == id }
-        }
-
-        override suspend fun deleteGoal(id: String) {
-            goals.value = goals.value.filterNot { it.id == id }
-        }
-
-        override suspend fun reorderGoals(orderedIds: List<String>) {
-            savedOrder = orderedIds
-        }
-    }
-
-    private val completionRepository = object : CompletionRepository {
-        override fun observeCompletions(periodKeys: Collection<PeriodKey>): Flow<List<Completion>> =
-            completions.map { list -> list.filter { it.periodKey in periodKeys } }
-
-        override fun observeCompletionsForGoal(goalId: String): Flow<List<Completion>> =
-            completions.map { list -> list.filter { it.goalId == goalId } }
-
-        override fun observeAllCompletions(): Flow<List<Completion>> = completions
-
-        override suspend fun setCompleted(
-            goalId: String,
-            periodKey: PeriodKey,
-            completed: Boolean,
-            at: Instant,
-        ) {
-            completions.value = if (completed) {
-                completions.value + Completion(UUID.randomUUID().toString(), goalId, periodKey, at)
-            } else {
-                completions.value.filterNot { it.goalId == goalId && it.periodKey == periodKey }
-            }
-        }
-    }
-
-    private val settingsRepository = object : SettingsRepository {
-        override val weekStart: Flow<WeekStart> = this@TodayViewModelTest.weekStart
-
-        override suspend fun setWeekStart(weekStart: WeekStart) {
-            this@TodayViewModelTest.weekStart.value = weekStart
-        }
-    }
-
-    /** Driven by the test so the calendar can be made to turn over on demand. */
-    private val todayFlow = MutableStateFlow(today)
-    private val todayClock = object : TodayClock {
-        override val today: Flow<LocalDate> = todayFlow
-    }
+    private val goals get() = goalRepository.goals
+    private val completions get() = completionRepository.completions
 
     private fun goal(
         id: String,
@@ -189,13 +124,13 @@ class TodayViewModelTest {
     fun `changing the week start re-keys the weekly section`() = runTest(dispatcher) {
         // Monday 2026-08-17 is ISO week 34, but under Sunday-start weeks it still
         // belongs to the week that opened on Sunday the 16th, which is week 33.
-        todayFlow.value = LocalDate.parse("2026-08-17")
+        todayClock.set(LocalDate.parse("2026-08-17"))
         goals.value = listOf(goal("b", Recurrence.WEEKLY, 0))
         val viewModel = viewModel()
 
         assertEquals(PeriodKey("2026-W34"), viewModel.uiState.first { !it.isLoading }.sections[1].periodKey)
 
-        weekStart.value = WeekStart.SUNDAY
+        settingsRepository.set(WeekStart.SUNDAY)
 
         assertEquals(
             PeriodKey("2026-W33"),
@@ -214,7 +149,7 @@ class TodayViewModelTest {
         assertTrue(viewModel.uiState.first { !it.isLoading }.sections[0].goals.first().isCompleted)
 
         // Midnight passes.
-        todayFlow.value = LocalDate.parse("2026-08-17")
+        todayClock.set(LocalDate.parse("2026-08-17"))
 
         val after = viewModel.uiState.first { it.sections[0].periodKey == PeriodKey("2026-08-17") }
         // The row resets because it is asking about a new key, and yesterday's
@@ -288,7 +223,7 @@ class TodayViewModelTest {
 
         // The whole list is written, not just the section that moved, so positions
         // stay globally consistent.
-        assertEquals(listOf("b", "a", "w"), savedOrder)
+        assertEquals(listOf("b", "a", "w"), goalRepository.savedOrder)
     }
 
     @Test
@@ -307,7 +242,7 @@ class TodayViewModelTest {
             viewModel.uiState.first { it.sections[0].goals.first().goal.id == "a" }
                 .sections[0].goals.map { it.goal.id },
         )
-        assertEquals(null, savedOrder)
+        assertEquals(null, goalRepository.savedOrder)
     }
 
     // endregion
