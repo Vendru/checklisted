@@ -72,6 +72,8 @@ class StyleExplorationScreenshotTest {
         val radius: Dp,
         val border: Dp,
         val shadow: ShadowStyle,
+        val shadowColor: Color = Color.Black,
+        val shadowOffset: Dp = 4.dp,
         val display: FontFamily,
         val body: FontFamily,
         val displaySize: Int,
@@ -200,6 +202,86 @@ class StyleExplorationScreenshotTest {
         tagAsDot = true,
     )
 
+    // The three directions in the middle band: keep the structural personality,
+    // turn every dial down instead of turning the whole thing off.
+
+    private val tamedLight = StyleSpec(
+        bg = Color(0xFFF7F2E9),
+        surface = Color(0xFFFFFFFF),
+        text = Color(0xFF241F1A),
+        secondary = Color(0xFF6B6259),
+        accent = Color(0xFFB83E1B),
+        onAccent = Color(0xFFFFFFFF),
+        divider = Color(0xFF241F1A),
+        track = Color(0xFFEDE5D6),
+        radius = 10.dp,
+        border = 1.5.dp,
+        shadow = ShadowStyle.HARD,
+        shadowColor = Color(0xFFD8CDBA),
+        shadowOffset = 3.dp,
+        display = anton,
+        body = FontFamily.SansSerif,
+        displaySize = 32,
+        uppercase = false,
+        rowPadding = 14.dp,
+        gap = 10.dp,
+        tagAsDot = true,
+    )
+
+    private val tamedDark = tamedLight.copy(
+        bg = Color(0xFF1A1714),
+        surface = Color(0xFF241F1A),
+        text = Color(0xFFF0EAE0),
+        secondary = Color(0xFFA79C8E),
+        accent = Color(0xFFFF7A4D),
+        onAccent = Color(0xFF1A1005),
+        divider = Color(0xFF4A4238),
+        track = Color(0xFF2E2822),
+        shadowColor = Color(0xFF0E0C0A),
+    )
+
+    private val editorialSurface = StyleSpec(
+        bg = Color(0xFFFBF6EE),
+        surface = Color(0xFFFFFFFF),
+        text = Color(0xFF1A1512),
+        secondary = Color(0xFF6E6155),
+        accent = Color(0xFF8C3A2B),
+        onAccent = Color(0xFFFFFFFF),
+        divider = Color(0xFFEADFD0),
+        track = Color(0xFFEFE6D8),
+        radius = 6.dp,
+        border = 1.dp,
+        shadow = ShadowStyle.NONE,
+        display = FontFamily.Serif,
+        body = FontFamily.SansSerif,
+        displaySize = 34,
+        uppercase = false,
+        rowPadding = 16.dp,
+        gap = 12.dp,
+        tagAsDot = true,
+    )
+
+    private val expressive = StyleSpec(
+        bg = Color(0xFFF5F1FB),
+        surface = Color(0xFFFFFFFF),
+        text = Color(0xFF1D1926),
+        secondary = Color(0xFF5A5266),
+        accent = Color(0xFF5B3FD6),
+        onAccent = Color(0xFFFFFFFF),
+        divider = Color(0xFFE9E0FB),
+        track = Color(0xFFE9E0FB),
+        radius = 24.dp,
+        border = 0.dp,
+        shadow = ShadowStyle.SOFT,
+        display = FontFamily.SansSerif,
+        body = FontFamily.SansSerif,
+        displaySize = 34,
+        uppercase = false,
+        rowPadding = 18.dp,
+        gap = 10.dp,
+        tagAsDot = true,
+    )
+
     private fun render(name: String, spec: StyleSpec) {
         paparazzi.snapshot(name = name) { SampleToday(spec) }
     }
@@ -215,6 +297,14 @@ class StyleExplorationScreenshotTest {
     @Test fun materialTonal() = render("c-material-tonal", material)
 
     @Test fun focusDarkMode() = render("d-foco-escuro", focusDark)
+
+    @Test fun tamedBrutalLight() = render("e-brutalismo-domado-claro", tamedLight)
+
+    @Test fun tamedBrutalDark() = render("e-brutalismo-domado-escuro", tamedDark)
+
+    @Test fun editorialWithSurface() = render("f-editorial-com-superficie", editorialSurface)
+
+    @Test fun expressiveTonal() = render("g-tonal-expressivo", expressive)
 
     // region the mock screen
 
@@ -418,8 +508,8 @@ class StyleExplorationScreenshotTest {
         ShadowStyle.HARD ->
             drawBehind {
                 val outline = shape.createOutline(size, layoutDirection, this)
-                translate(left = 4.dp.toPx(), top = 4.dp.toPx()) {
-                    drawOutline(outline, Color.Black)
+                translate(left = spec.shadowOffset.toPx(), top = spec.shadowOffset.toPx()) {
+                    drawOutline(outline, spec.shadowColor)
                 }
             }
                 .background(fill, shape)
