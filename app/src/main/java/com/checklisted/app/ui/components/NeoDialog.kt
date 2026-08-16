@@ -20,7 +20,6 @@ import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Modal used for destructive confirmations and small pickers.
@@ -37,7 +36,7 @@ fun NeoDialog(
     confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
     dismissText: String? = null,
-    confirmAccent: NeoAccent = NeoAccent.ORANGE,
+    confirmAccent: NeoAccent? = null,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     Dialog(
@@ -74,7 +73,7 @@ private fun NeoDialogContent(
     onConfirm: (() -> Unit)? = null,
     dismissText: String? = null,
     onDismiss: () -> Unit = {},
-    confirmAccent: NeoAccent = NeoAccent.ORANGE,
+    confirmAccent: NeoAccent? = null,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
@@ -87,7 +86,7 @@ private fun NeoDialogContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = title.displayUppercase(),
+            text = title,
             style = MaterialTheme.typography.headlineSmall,
             color = colors.ink,
         )

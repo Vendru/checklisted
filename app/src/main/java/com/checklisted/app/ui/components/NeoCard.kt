@@ -16,7 +16,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoShapes
-import com.checklisted.app.ui.theme.NeoTeal
 import com.checklisted.app.ui.theme.NeoTheme
 
 /**
@@ -92,11 +91,11 @@ internal fun NeoCardSamples() {
             style = MaterialTheme.typography.bodyMedium,
         )
     }
-    NeoCard(color = NeoTeal, onClick = {}) {
+    NeoCard(color = NeoTheme.colors.action, onClick = {}) {
         Text(
             text = stringResource(R.string.sample_card_clickable),
             style = MaterialTheme.typography.titleMedium,
-            color = NeoTheme.colors.onAccent,
+            color = NeoTheme.colors.onAction,
         )
     }
 }

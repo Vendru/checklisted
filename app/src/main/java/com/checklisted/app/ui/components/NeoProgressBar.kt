@@ -33,7 +33,7 @@ private val DefaultBarHeight = 22.dp
 fun NeoProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
+    accent: NeoAccent? = null,
     height: Dp = DefaultBarHeight,
     animated: Boolean = true,
 ) {
@@ -53,14 +53,14 @@ fun NeoProgressBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .neoSurface(color = NeoTheme.colors.surface, shape = NeoShapes.extraSmall)
+            .neoSurface(color = NeoTheme.colors.surfaceMuted, shape = NeoShapes.extraSmall)
             .semantics { progressBarRangeInfo = ProgressBarRangeInfo(shown, 0f..1f) },
     ) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(shown)
-                .background(accent.color),
+                .background(accent?.color ?: NeoTheme.colors.action),
         )
     }
 }

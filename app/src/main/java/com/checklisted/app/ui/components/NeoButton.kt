@@ -19,7 +19,6 @@ import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Primary action. Label is always uppercase — the design system has no
@@ -30,16 +29,18 @@ fun NeoButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
+    accent: NeoAccent? = null,
     enabled: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
+    // Null means the app's single action colour. A goal tag can still be passed to
+    // colour an action that belongs to one specific goal.
     NeoButtonBody(
         text = text,
         onClick = onClick,
         modifier = modifier,
-        fill = accent.color,
-        contentColor = NeoTheme.colors.onAccent,
+        fill = accent?.color ?: NeoTheme.colors.action,
+        contentColor = if (accent == null) NeoTheme.colors.onAction else NeoTheme.colors.surface,
         enabled = enabled,
         leadingIcon = leadingIcon,
     )
@@ -102,7 +103,7 @@ private fun NeoButtonBody(
     ) {
         leadingIcon?.invoke()
         Text(
-            text = text.displayUppercase(),
+            text = text,
             style = MaterialTheme.typography.labelLarge,
             // Disabled swaps the fill to a neutral, so the label follows the ink
             // rather than the accent's contrast colour.

@@ -81,7 +81,7 @@ fun Modifier.neoSurface(
     shape: Shape,
     pressed: Boolean = false,
     enabled: Boolean = true,
-    borderColor: Color = NeoTheme.colors.ink,
+    borderColor: Color = NeoTheme.colors.divider,
     shadowColor: Color = NeoTheme.colors.shadow,
     borderWidth: Dp = NeoTokens.BorderWidth,
     shadowOffset: Dp = NeoTokens.ShadowOffset,

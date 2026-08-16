@@ -19,8 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * A single number with its label.
@@ -45,11 +43,11 @@ fun NeoStatTile(
     ) {
         Text(
             text = value,
-            style = MaterialTheme.typography.displaySmall.condensed(),
+            style = MaterialTheme.typography.displaySmall,
             color = contentColor,
         )
         Text(
-            text = label.displayUppercase(),
+            text = label,
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
         )
@@ -64,7 +62,7 @@ fun NeoStatRow(
     ratePercent: Int,
     rateLabel: String,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
+    accent: NeoAccent? = null,
 ) {
     // IntrinsicSize.Min so all three match the tallest: the rate label wraps to two
     // lines on some recurrences, and ragged bottoms read as a mistake.
@@ -77,10 +75,10 @@ fun NeoStatRow(
         NeoStatTile(
             value = currentStreak.toString(),
             label = stringResource(R.string.stat_current_streak),
-            color = accent.color,
+            color = accent?.color ?: NeoTheme.colors.action,
             // The tile is filled with the accent, so its text follows the accent's
             // contrast colour rather than the page ink.
-            contentColor = NeoTheme.colors.onAccent,
+            contentColor = NeoTheme.colors.onAction,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),

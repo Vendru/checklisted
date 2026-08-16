@@ -1,10 +1,14 @@
 package com.checklisted.app.ui.today
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +25,6 @@ import com.checklisted.app.R
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
-import com.checklisted.app.ui.components.NeoIconDrag
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
 
@@ -89,10 +92,11 @@ fun GoalRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Ticking is an action, so the box wears the action colour. Which goal
+            // this is gets told by the dot on the far side.
             NeoCheckbox(
                 checked = status.isCompleted,
                 onCheckedChange = { onToggle() },
-                accent = accent,
                 contentDescription = status.goal.title,
             )
 
@@ -100,7 +104,7 @@ fun GoalRow(
                 Text(
                     text = status.goal.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = colors.ink,
+                    color = if (status.isCompleted) colors.inkSoft else colors.ink,
                     textDecoration = if (status.isCompleted) TextDecoration.LineThrough else null,
                 )
                 val description = status.goal.description
@@ -108,13 +112,19 @@ fun GoalRow(
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodySmall,
-                        color = colors.ink,
+                        color = colors.inkSoft,
                         modifier = Modifier.padding(top = 2.dp),
                     )
                 }
             }
 
-            NeoIconDrag(tint = colors.ink)
+            // The tag: 8.dp of the goal's own colour. Small enough to stay quiet,
+            // saturated enough to identify the row at a glance.
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(accent.color, CircleShape),
+            )
         }
     }
 }

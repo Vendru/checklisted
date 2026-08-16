@@ -21,12 +21,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
-import com.checklisted.app.ui.theme.NeoOrange
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
-import com.checklisted.app.ui.theme.NeoYellow
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Single- or multi-line text input.
@@ -62,12 +59,12 @@ fun NeoTextField(
     val resolvedMaxLines = maxOf(maxLines, minLines)
 
     val onAccentFill = errorText != null || focused
-    val contentColor = if (onAccentFill) colors.onAccent else colors.ink
+    val contentColor = if (onAccentFill) colors.onAction else colors.ink
 
     Column(modifier = modifier) {
         if (label != null) {
             Text(
-                text = label.displayUppercase(),
+                text = label,
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.ink,
                 modifier = Modifier.padding(bottom = 6.dp),
@@ -89,8 +86,10 @@ fun NeoTextField(
                 .fillMaxWidth()
                 .neoSurface(
                     color = when {
-                        errorText != null -> NeoOrange
-                        focused -> NeoYellow
+                        // Focus and error both fill with the action colour; the
+                        // error is told apart by the message under the field, not by
+                        // a second hue competing with it.
+                        errorText != null || focused -> colors.action
                         else -> colors.surface
                     },
                     shape = NeoShapes.small,

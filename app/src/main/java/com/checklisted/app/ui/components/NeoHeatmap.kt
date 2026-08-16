@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.domain.history.HeatmapDay
-import com.checklisted.app.ui.theme.NeoAccent
+import com.checklisted.app.ui.theme.NeoColors
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
@@ -35,15 +35,17 @@ private const val DAYS_PER_WEEK = 7
  * Calendar grid of the recent past, one square per day.
  *
  * Weeks run down the page and weekdays across it, so the columns line up by day of
- * week. Intensity is quantised into four solid fills rather than being interpolated
- * continuously — a smooth ramp would read as a gradient, which this design forbids,
- * and four steps are all a reader can tell apart at this size anyway.
+ * week. Intensity is quantised into four solid fills; four steps are all a reader can
+ * tell apart at this size.
+ *
+ * The ramp is deliberately not the action colour and takes no accent: this grid
+ * repeats its colour eighty times on one screen, and painting it in the colour of
+ * buttons made "this is tappable" and "this was a busy week" look identical.
  */
 @Composable
 fun NeoHeatmap(
     days: List<HeatmapDay>,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
     onDayClick: ((HeatmapDay) -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
@@ -63,7 +65,6 @@ fun NeoHeatmap(
                 week.forEach { day ->
                     HeatmapCell(
                         day = day,
-                        accent = accent,
                         onClick = onDayClick,
                         modifier = Modifier.weight(1f),
                     )
@@ -75,14 +76,13 @@ fun NeoHeatmap(
             }
         }
 
-        Legend(accent = accent, ink = colors.ink)
+        Legend(colors = colors)
     }
 }
 
 @Composable
 private fun HeatmapCell(
     day: HeatmapDay,
-    accent: NeoAccent,
     onClick: ((HeatmapDay) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -99,8 +99,8 @@ private fun HeatmapCell(
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .background(cellColor(day, accent, colors.surface), NeoShapes.extraSmall)
-            .border(NeoTokens.HairlineBorder, colors.ink, NeoShapes.extraSmall)
+            .background(cellColor(day, colors), NeoShapes.extraSmall)
+            .border(NeoTokens.HairlineBorder, colors.divider, NeoShapes.extraSmall)
             .then(clickModifier)
             .semantics { contentDescription = label },
     )
@@ -109,15 +109,15 @@ private fun HeatmapCell(
 /**
  * Four steps: untouched, and three levels of done.
  *
- * Untracked days — before the goal existed — get the plain surface, the same as a
- * day with nothing done. They are distinguishable by position, not by colour; a
- * fifth shade would be indistinguishable at 16.dp.
+ * Untracked days — before the goal existed — get the same empty fill as a day with
+ * nothing done. They are distinguishable by position, not by colour; a fifth shade
+ * would be indistinguishable at this size.
  */
-private fun cellColor(day: HeatmapDay, accent: NeoAccent, surface: Color): Color = when {
-    !day.isTracked || day.completed == 0 -> surface
-    day.fraction >= 1f -> accent.color
-    day.fraction >= 0.5f -> lerp(surface, accent.color, 0.7f)
-    else -> lerp(surface, accent.color, 0.4f)
+private fun cellColor(day: HeatmapDay, colors: NeoColors): Color = when {
+    !day.isTracked || day.completed == 0 -> colors.dataLow
+    day.fraction >= 1f -> colors.dataHigh
+    day.fraction >= 0.5f -> lerp(colors.dataLow, colors.dataHigh, 0.7f)
+    else -> lerp(colors.dataLow, colors.dataHigh, 0.4f)
 }
 
 @Composable
@@ -134,7 +134,7 @@ private fun WeekdayHeader(firstDate: LocalDate) {
             Text(
                 text = day.getDisplayName(TextStyle.NARROW, locale).uppercase(locale),
                 style = MaterialTheme.typography.labelSmall,
-                color = colors.ink,
+                color = colors.inkSoft,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -142,23 +142,22 @@ private fun WeekdayHeader(firstDate: LocalDate) {
 }
 
 @Composable
-private fun Legend(accent: NeoAccent, ink: Color) {
-    val colors = NeoTheme.colors
+private fun Legend(colors: NeoColors) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         listOf(
-            colors.surface,
-            lerp(colors.surface, accent.color, 0.4f),
-            lerp(colors.surface, accent.color, 0.7f),
-            accent.color,
+            colors.dataLow,
+            lerp(colors.dataLow, colors.dataHigh, 0.4f),
+            lerp(colors.dataLow, colors.dataHigh, 0.7f),
+            colors.dataHigh,
         ).forEach { fill ->
             Box(
                 modifier = Modifier
                     .size(12.dp)
                     .background(fill, NeoShapes.extraSmall)
-                    .border(NeoTokens.HairlineBorder, ink, NeoShapes.extraSmall),
+                    .border(NeoTokens.HairlineBorder, colors.divider, NeoShapes.extraSmall),
             )
         }
     }
@@ -181,6 +180,6 @@ private fun NeoHeatmapPreview() {
         )
     }
     PreviewStack {
-        NeoHeatmap(days = days, accent = NeoAccent.TEAL)
+        NeoHeatmap(days = days)
     }
 }

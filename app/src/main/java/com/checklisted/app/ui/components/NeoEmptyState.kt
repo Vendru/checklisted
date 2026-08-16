@@ -21,7 +21,6 @@ import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Illustrated empty state.
@@ -50,7 +49,7 @@ fun NeoEmptyState(
         EmptyBoxMark(accent = accent)
 
         Text(
-            text = title.displayUppercase(),
+            text = title,
             style = MaterialTheme.typography.headlineSmall,
             color = colors.ink,
             textAlign = TextAlign.Center,
@@ -85,14 +84,14 @@ private fun EmptyBoxMark(accent: NeoAccent) {
             val elbow = Offset(w * 0.42f, h * 0.74f)
             val end = Offset(w * 0.82f, h * 0.24f)
 
-            drawLine(colors.onAccent, start, elbow, stroke, StrokeCap.Square)
+            drawLine(colors.onAction, start, elbow, stroke, StrokeCap.Square)
 
             fun along(t: Float) = Offset(
                 x = elbow.x + (end.x - elbow.x) * t,
                 y = elbow.y + (end.y - elbow.y) * t,
             )
             listOf(0.04f to 0.24f, 0.44f to 0.64f, 0.84f to 1f).forEach { (from, to) ->
-                drawLine(colors.onAccent, along(from), along(to), stroke, StrokeCap.Square)
+                drawLine(colors.onAction, along(from), along(to), stroke, StrokeCap.Square)
             }
         }
     }

@@ -21,7 +21,6 @@ import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
-import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Compact single-choice toggle used for recurrence pickers and filters.
@@ -35,7 +34,7 @@ fun NeoChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
+    accent: NeoAccent? = null,
     enabled: Boolean = true,
 ) {
     val colors = NeoTheme.colors
@@ -45,7 +44,7 @@ fun NeoChip(
     Row(
         modifier = modifier
             .neoSurface(
-                color = if (selected) accent.color else colors.surface,
+                color = if (selected) (accent?.color ?: colors.action) else colors.surface,
                 shape = NeoShapes.small,
                 pressed = pressed,
                 enabled = enabled,
@@ -63,9 +62,9 @@ fun NeoChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = label.displayUppercase(),
+            text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) colors.onAccent else colors.ink,
+            color = if (selected) colors.onAction else colors.ink,
         )
     }
 }

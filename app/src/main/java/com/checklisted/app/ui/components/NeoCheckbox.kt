@@ -50,7 +50,7 @@ fun NeoCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
+    accent: NeoAccent? = null,
     enabled: Boolean = true,
     size: Dp = BoxSize,
     contentDescription: String? = null,
@@ -97,7 +97,7 @@ fun NeoCheckbox(
         Box(
             modifier = Modifier
                 .neoSurface(
-                    color = if (checked) accent.color else colors.surface,
+                    color = if (checked) (accent?.color ?: colors.action) else colors.surface,
                     shape = NeoShapes.small,
                     pressed = pressed,
                     enabled = enabled,
@@ -134,7 +134,7 @@ fun NeoCheckbox(
 
                     drawPath(
                         path = path,
-                        color = colors.onAccent,
+                        color = if (accent == null) colors.onAction else colors.surface,
                         style = Stroke(
                             width = CheckStroke.toPx(),
                             cap = StrokeCap.Square,
