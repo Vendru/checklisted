@@ -32,8 +32,6 @@ import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -66,8 +64,8 @@ fun HistoryScreen(
         ) {
             NeoBackButton(onClick = onBack)
             Text(
-                text = stringResource(R.string.history_title).displayUppercase(),
-                style = MaterialTheme.typography.headlineMedium.condensed(),
+                text = stringResource(R.string.history_title),
+                style = MaterialTheme.typography.headlineMedium,
                 color = colors.ink,
             )
         }
@@ -76,7 +74,6 @@ fun HistoryScreen(
             NeoEmptyState(
                 title = stringResource(R.string.empty_history_title),
                 message = stringResource(R.string.empty_history_message),
-                accent = NeoAccent.PURPLE,
             )
         } else {
             Text(
@@ -86,7 +83,6 @@ fun HistoryScreen(
             )
             NeoHeatmap(
                 days = state.heatmap,
-                accent = NeoAccent.PURPLE,
                 onDayClick = { day -> viewModel.selectDay(day.date) },
             )
         }

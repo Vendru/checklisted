@@ -25,9 +25,7 @@ import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.NeoStatRow
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.displayUppercase
 import com.checklisted.app.ui.today.GoalRow
 import org.junit.Rule
 import org.junit.Test
@@ -92,7 +90,7 @@ class AppSurfacesScreenshotTest {
     @Test
     fun goalList() = bothThemes("lista-de-metas") {
         Text(
-            text = "Hoje".displayUppercase(),
+            text = "Hoje",
             style = MaterialTheme.typography.displaySmall,
             color = NeoTheme.colors.ink,
         )
@@ -102,7 +100,7 @@ class AppSurfacesScreenshotTest {
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = "Diárias".displayUppercase(),
+                text = "Diárias",
                 style = MaterialTheme.typography.headlineSmall,
                 color = NeoTheme.colors.ink,
             )
@@ -112,7 +110,7 @@ class AppSurfacesScreenshotTest {
                 color = NeoTheme.colors.ink,
             )
         }
-        NeoProgressBar(progress = 2f / 3f, accent = NeoAccent.YELLOW, animated = false)
+        NeoProgressBar(progress = 2f / 3f, animated = false)
 
         GoalRow(
             status = status("Beber 2L de água", "TEAL", completed = true),
@@ -153,7 +151,6 @@ class AppSurfacesScreenshotTest {
             bestStreak = 31,
             ratePercent = 73,
             rateLabel = "Últimos 30 dias",
-            accent = NeoAccent.PINK,
         )
     }
 
@@ -170,6 +167,6 @@ class AppSurfacesScreenshotTest {
                 total = if (offset < 9) 0 else 3,
             )
         }
-        NeoHeatmap(days = days, accent = NeoAccent.PURPLE)
+        NeoHeatmap(days = days)
     }
 }

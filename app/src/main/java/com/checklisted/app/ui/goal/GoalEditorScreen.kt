@@ -40,8 +40,6 @@ import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoTextField
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 
 @Composable
 fun GoalEditorScreen(
@@ -107,8 +105,8 @@ private fun GoalEditorContent(
             Text(
                 text = stringResource(
                     if (state.isEditing) R.string.goal_editor_title_edit else R.string.goal_editor_title_new,
-                ).displayUppercase(),
-                style = MaterialTheme.typography.headlineMedium.condensed(),
+                ),
+                style = MaterialTheme.typography.headlineMedium,
                 color = colors.ink,
             )
         }
@@ -138,7 +136,6 @@ private fun GoalEditorContent(
                     label = stringResource(recurrence.labelRes()),
                     selected = state.recurrence == recurrence,
                     onClick = { onRecurrenceChange(recurrence) },
-                    accent = state.accent,
                 )
             }
         }
@@ -149,7 +146,6 @@ private fun GoalEditorContent(
         NeoButton(
             text = stringResource(R.string.action_save),
             onClick = onSave,
-            accent = state.accent,
             enabled = state.canSave,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -165,7 +161,6 @@ private fun GoalEditorContent(
             NeoButton(
                 text = stringResource(R.string.action_delete),
                 onClick = { showDeleteDialog = true },
-                accent = NeoAccent.ORANGE,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -189,7 +184,7 @@ private fun GoalEditorContent(
 @Composable
 private fun FieldLabel(text: String) {
     Text(
-        text = text.displayUppercase(),
+        text = text,
         style = MaterialTheme.typography.labelMedium,
         color = NeoTheme.colors.ink,
     )

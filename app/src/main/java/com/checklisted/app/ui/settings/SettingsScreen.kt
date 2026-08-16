@@ -40,10 +40,7 @@ import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoChip
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 import java.time.LocalTime
 
 private val REMINDER_TIMES = listOf(
@@ -95,8 +92,8 @@ fun SettingsScreen(
         ) {
             NeoBackButton(onClick = onBack)
             Text(
-                text = stringResource(R.string.settings_title).displayUppercase(),
-                style = MaterialTheme.typography.headlineMedium.condensed(),
+                text = stringResource(R.string.settings_title),
+                style = MaterialTheme.typography.headlineMedium,
                 color = colors.ink,
             )
         }
@@ -111,7 +108,6 @@ fun SettingsScreen(
                         label = stringResource(option.labelRes()),
                         selected = state.settings.weekStart == option,
                         onClick = { viewModel.setWeekStart(option) },
-                        accent = NeoAccent.TEAL,
                     )
                 }
             }
@@ -124,7 +120,6 @@ fun SettingsScreen(
                         label = stringResource(option.labelRes()),
                         selected = state.settings.themeMode == option,
                         onClick = { viewModel.setThemeMode(option) },
-                        accent = NeoAccent.PURPLE,
                     )
                 }
             }
@@ -140,7 +135,6 @@ fun SettingsScreen(
             ) {
                 NeoCheckbox(
                     checked = state.settings.reminderEnabled,
-                    accent = NeoAccent.PINK,
                     contentDescription = stringResource(R.string.settings_reminder_enable),
                     onCheckedChange = { enabled ->
                         if (enabled && needsNotificationPermission(context)) {
@@ -168,7 +162,7 @@ fun SettingsScreen(
 
             if (state.settings.reminderEnabled) {
                 Text(
-                    text = stringResource(R.string.settings_reminder_time).displayUppercase(),
+                    text = stringResource(R.string.settings_reminder_time),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.ink,
                 )
@@ -178,7 +172,6 @@ fun SettingsScreen(
                             label = "%02d:%02d".format(time.hour, time.minute),
                             selected = state.settings.reminderTime == time,
                             onClick = { viewModel.setReminderTime(time) },
-                            accent = NeoAccent.PINK,
                         )
                     }
                 }
@@ -197,7 +190,7 @@ private fun SettingsSection(
     NeoCard(modifier = modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                text = title.displayUppercase(),
+                text = title,
                 style = MaterialTheme.typography.labelLarge,
                 color = NeoTheme.colors.ink,
             )

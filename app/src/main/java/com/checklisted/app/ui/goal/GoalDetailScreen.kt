@@ -32,8 +32,6 @@ import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoStatRow
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 
 @Composable
 fun GoalDetailScreen(
@@ -73,8 +71,8 @@ fun GoalDetailScreen(
         ) {
             NeoBackButton(onClick = onBack)
             Text(
-                text = (goal?.title ?: "").displayUppercase(),
-                style = MaterialTheme.typography.headlineMedium.condensed(),
+                text = (goal?.title ?: ""),
+                style = MaterialTheme.typography.headlineMedium,
                 color = colors.ink,
                 modifier = Modifier.weight(1f),
             )
@@ -99,7 +97,7 @@ fun GoalDetailScreen(
             )
 
             Text(
-                text = stringResource(R.string.detail_heatmap_title).displayUppercase(),
+                text = stringResource(R.string.detail_heatmap_title),
                 style = MaterialTheme.typography.labelLarge,
                 color = colors.ink,
             )
@@ -110,7 +108,6 @@ fun GoalDetailScreen(
             )
             NeoHeatmap(
                 days = state.heatmap,
-                accent = accent,
                 onDayClick = { day -> viewModel.toggleDay(day.date) },
             )
 

@@ -46,10 +46,7 @@ import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.ReorderState
 import com.checklisted.app.ui.components.rememberReorderState
 import com.checklisted.app.ui.components.reorderable
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.condensed
-import com.checklisted.app.ui.theme.displayUppercase
 import kotlinx.coroutines.isActive
 
 @Composable
@@ -138,8 +135,8 @@ private fun TodayContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = stringResource(R.string.today_title).displayUppercase(),
-                        style = MaterialTheme.typography.displaySmall.condensed(),
+                        text = stringResource(R.string.today_title),
+                        style = MaterialTheme.typography.displaySmall,
                         color = colors.ink,
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -187,8 +184,7 @@ private fun TodayContent(
             NeoButton(
                 text = stringResource(R.string.action_new_goal),
                 onClick = onCreateGoal,
-                accent = NeoAccent.PINK,
-                leadingIcon = { NeoIconPlus(tint = colors.onAccent, size = 18.dp) },
+                leadingIcon = { NeoIconPlus(tint = colors.onAction, size = 18.dp) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(insets)
@@ -245,7 +241,6 @@ private fun LazyListScope.todaySection(
 @Composable
 private fun SectionHeader(section: TodaySection) {
     val colors = NeoTheme.colors
-    val accent = section.recurrence.accent()
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -254,7 +249,7 @@ private fun SectionHeader(section: TodaySection) {
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = stringResource(section.recurrence.labelRes()).displayUppercase(),
+                text = stringResource(section.recurrence.labelRes()),
                 style = MaterialTheme.typography.headlineSmall,
                 color = colors.ink,
             )
@@ -264,7 +259,7 @@ private fun SectionHeader(section: TodaySection) {
                 color = colors.ink,
             )
         }
-        NeoProgressBar(progress = section.progress, accent = accent)
+        NeoProgressBar(progress = section.progress)
     }
 }
 
@@ -296,12 +291,6 @@ private fun Recurrence.emptyMessageRes() = when (this) {
     Recurrence.DAILY -> R.string.empty_section_daily
     Recurrence.WEEKLY -> R.string.empty_section_weekly
     Recurrence.MONTHLY -> R.string.empty_section_monthly
-}
-
-private fun Recurrence.accent() = when (this) {
-    Recurrence.DAILY -> NeoAccent.YELLOW
-    Recurrence.WEEKLY -> NeoAccent.TEAL
-    Recurrence.MONTHLY -> NeoAccent.PURPLE
 }
 
 private const val HEADER_KEY = "today-header"
