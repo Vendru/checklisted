@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Checklisted</string>
+
+    <!-- Galeria do design system (fase 1) -->
+    <string name="gallery_title">Design system</string>
+    <string name="gallery_section_buttons">Botões</string>
+    <string name="gallery_section_checkbox">Checkbox</string>
+    <string name="gallery_section_chips">Chips</string>
+    <string name="gallery_section_progress">Progresso</string>
+    <string name="gallery_section_text_field">Campo de texto</string>
+    <string name="gallery_section_cards">Cards e diálogo</string>
+
+    <!-- Ações -->
+    <string name="action_new_goal">Nova meta</string>
+    <string name="action_complete">Concluir</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_delete">Excluir</string>
+    <string name="action_disabled">Desativado</string>
+    <string name="action_open_dialog">Abrir diálogo</string>
+
+    <!-- Campos -->
+    <string name="field_title">Título</string>
+    <string name="field_title_placeholder">Ex.: Ler 20 páginas</string>
+
+    <!-- Recorrência -->
+    <string name="recurrence_daily">Diária</string>
+    <string name="recurrence_weekly">Semanal</string>
+    <string name="recurrence_monthly">Mensal</string>
+
+    <!-- Diálogos -->
+    <string name="dialog_delete_title">Excluir meta?</string>
+    <string name="dialog_delete_message">Isso apaga o histórico junto. Se você só quer tirar da lista, arquive.</string>
+
+    <!-- Amostras -->
+    <string name="sample_goal_title">Beber 2L de água</string>
+    <string name="sample_goal_description">Todo santo dia, sem desculpa.</string>
+</resources>
