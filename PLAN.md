@@ -78,7 +78,7 @@ testes JVM rápidos. Usa `java.time` com desugaring habilitado (minSdk 26 já te
 Cada fase termina com `./gradlew assembleDebug` e `./gradlew test` passando, um
 commit e um resumo para você antes de eu seguir.
 
-### Fase 1 — Projeto + design system
+### Fase 1 — Projeto + design system ✅
 
 - Scaffold Gradle KTS com `libs.versions.toml`, minSdk 26 / targetSdk 35
 - Hilt, Room, DataStore, Navigation, WorkManager declarados
@@ -89,7 +89,7 @@ commit e um resumo para você antes de eu seguir.
 - Os 7 componentes `Neo*`, cada um com `@Preview` claro e escuro
 - **Entregável:** app roda mostrando uma galeria dos componentes
 
-### Fase 2 — Persistência + lógica de período (testada)
+### Fase 2 — Persistência + lógica de período (testada) ✅
 
 - Entities `GoalEntity` / `CompletionEntity`, índice único `(goalId, periodKey)`
 - DAOs com `Flow`, repositórios, módulos Hilt
@@ -101,6 +101,12 @@ commit e um resumo para você antes de eu seguir.
   ISO, ano bissexto, mudança de fuso, semana começando no domingo, buraco no meio
   do histórico, marcação retroativa
 - **Entregável:** `./gradlew test` verde, sem UI nova
+
+> **Nota sobre o início da semana.** A chave semanal usa regras ISO generalizadas
+> (`WeekFields.of(primeiroDia, 4)`), então funciona para segunda **e** domingo.
+> Trocar a configuração re-agrupa o histórico semanal: uma conclusão gravada sob
+> semana-começa-na-segunda pode cair numa semana de número diferente depois da
+> troca. Nada é apagado — o histórico é relido através da nova fronteira.
 
 ### Fase 3 — Tela Hoje + CRUD
 
@@ -135,11 +141,17 @@ commit e um resumo para você antes de eu seguir.
 
 ## Definição de pronto
 
-- [ ] `./gradlew assembleDebug` passando
-- [ ] `./gradlew test` passando
-- [ ] Nenhum warning novo de compilação
-- [ ] `@Preview` para cada componente do design system
-- [ ] ktlint sem violações
+Estado após a Fase 2:
+
+- [x] `./gradlew assembleDebug` passando
+- [x] `./gradlew test` passando — 57 testes
+- [x] Nenhum warning novo de compilação
+- [x] `@Preview` para cada componente do design system
+- [x] ktlint sem violações
+
+Não verificado: **aparência**. O container não tem KVM, então não há emulador, e
+previews do Compose não renderizam headless. O visual só foi validado por leitura
+de código.
 
 ---
 
