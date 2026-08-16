@@ -85,6 +85,18 @@ class PeriodCalculatorTest {
         )
     }
 
+    @Test
+    fun `the two week starts can agree on the number and still disagree on the boundary`() {
+        // Sunday 2026-08-16 lands in week 33 under both settings, so the key alone
+        // does not reveal the difference — but the periods are not the same seven
+        // days, and the Monday after them splits.
+        assertEquals("2026-W33", mondayWeeks.key(Recurrence.WEEKLY, "2026-08-16"))
+        assertEquals("2026-W33", sundayWeeks.key(Recurrence.WEEKLY, "2026-08-16"))
+
+        assertEquals("2026-W34", mondayWeeks.key(Recurrence.WEEKLY, "2026-08-17"))
+        assertEquals("2026-W33", sundayWeeks.key(Recurrence.WEEKLY, "2026-08-17"))
+    }
+
     // endregion
 
     // region year boundaries

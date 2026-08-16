@@ -108,7 +108,7 @@ commit e um resumo para você antes de eu seguir.
 > semana-começa-na-segunda pode cair numa semana de número diferente depois da
 > troca. Nada é apagado — o histórico é relido através da nova fronteira.
 
-### Fase 3 — Tela Hoje + CRUD
+### Fase 3 — Tela Hoje + CRUD ✅
 
 - Hoje: três seções (Diárias / Semanais / Mensais), contador `3/5`,
   `NeoProgressBar` chunky por seção
@@ -118,6 +118,10 @@ commit e um resumo para você antes de eu seguir.
 - Estados vazios ilustrados com texto com personalidade
 - Virada de período reativa ligada de ponta a ponta
 - **Entregável:** app usável
+
+> A galeria de componentes da Fase 1 foi removida: ela era o entry point
+> provisório e agora está substituída pela tela Hoje. Os `@Preview` de cada
+> componente continuam de pé.
 
 ### Fase 4 — Streaks + histórico
 
@@ -141,10 +145,10 @@ commit e um resumo para você antes de eu seguir.
 
 ## Definição de pronto
 
-Estado após a Fase 2:
+Estado após a Fase 3:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 57 testes
+- [x] `./gradlew test` passando — 70 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
