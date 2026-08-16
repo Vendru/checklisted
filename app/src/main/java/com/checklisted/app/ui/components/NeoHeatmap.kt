@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,23 +26,28 @@ import com.checklisted.app.ui.theme.NeoColors
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
 private const val DAYS_PER_WEEK = 7
+private val LabelWidth = 20.dp
+private val CellGap = 3.dp
 
 /**
  * Calendar grid of the recent past, one square per day.
  *
- * Weeks run down the page and weekdays across it, so the columns line up by day of
- * week. Intensity is quantised into four solid fills; four steps are all a reader can
- * tell apart at this size.
+ * Weekdays run down the page and **weeks run across it**, so three months fit in
+ * seven short rows instead of thirteen tall ones. Laying it out the other way round
+ * gave cells a seventh of the screen width each, made the grid taller than the
+ * display, and — because the oldest period sorts first — opened the screen on months
+ * of empty squares from before the goal existed. Here the newest week is the
+ * rightmost column, which is where the eye lands.
  *
- * The ramp is deliberately not the action colour and takes no accent: this grid
- * repeats its colour eighty times on one screen, and painting it in the colour of
- * buttons made "this is tappable" and "this was a busy week" look identical.
+ * Intensity is quantised into four solid fills. The ramp is deliberately not the
+ * action colour and takes no accent: this grid repeats its colour dozens of times on
+ * one screen, and painting it in the colour of buttons made "this is tappable" and
+ * "this was a busy week" look identical.
  */
 @Composable
 fun NeoHeatmap(
@@ -51,27 +58,41 @@ fun NeoHeatmap(
     val colors = NeoTheme.colors
     if (days.isEmpty()) return
 
+    val locale = Locale.getDefault()
+    val weeks = (days.size + DAYS_PER_WEEK - 1) / DAYS_PER_WEEK
+    val firstDate = days.first().date
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(CellGap),
     ) {
-        WeekdayHeader(firstDate = days.first().date)
-
-        days.chunked(DAYS_PER_WEEK).forEach { week ->
+        repeat(DAYS_PER_WEEK) { weekday ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(CellGap),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                week.forEach { day ->
-                    HeatmapCell(
-                        day = day,
-                        onClick = onDayClick,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                // Keeps a short final week aligned to the left instead of stretching.
-                repeat(DAYS_PER_WEEK - week.size) {
-                    Box(modifier = Modifier.weight(1f))
+                Text(
+                    text = firstDate.plusDays(weekday.toLong()).dayOfWeek
+                        .getDisplayName(TextStyle.NARROW, locale)
+                        .uppercase(locale),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.inkSoft,
+                    modifier = Modifier.width(LabelWidth),
+                )
+                repeat(weeks) { week ->
+                    val day = days.getOrNull(week * DAYS_PER_WEEK + weekday)
+                    if (day == null) {
+                        // A trailing partial week: hold the column so the grid stays
+                        // rectangular instead of the last row stretching.
+                        Spacer(modifier = Modifier.weight(1f))
+                    } else {
+                        HeatmapCell(
+                            day = day,
+                            onClick = onDayClick,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
         }
@@ -121,32 +142,12 @@ private fun cellColor(day: HeatmapDay, colors: NeoColors): Color = when {
 }
 
 @Composable
-private fun WeekdayHeader(firstDate: LocalDate) {
-    val colors = NeoTheme.colors
-    val locale = Locale.getDefault()
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        repeat(DAYS_PER_WEEK) { index ->
-            val day: DayOfWeek = firstDate.plusDays(index.toLong()).dayOfWeek
-            Text(
-                text = day.getDisplayName(TextStyle.NARROW, locale).uppercase(locale),
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.inkSoft,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Composable
 private fun Legend(colors: NeoColors) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Spacer(modifier = Modifier.width(LabelWidth))
         listOf(
             colors.dataLow,
             lerp(colors.dataLow, colors.dataHigh, 0.4f),
@@ -167,7 +168,7 @@ private fun Legend(colors: NeoColors) {
 @Composable
 private fun NeoHeatmapPreview() {
     val start = LocalDate.parse("2026-06-01")
-    val days = (0 until 63).map { offset ->
+    val days = (0 until 91).map { offset ->
         HeatmapDay(
             date = start.plusDays(offset.toLong()),
             completed = when (offset % 5) {
@@ -176,7 +177,7 @@ private fun NeoHeatmapPreview() {
                 2 -> 2
                 else -> 3
             },
-            total = if (offset < 7) 0 else 3,
+            total = if (offset < 12) 0 else 3,
         )
     }
     PreviewStack {
