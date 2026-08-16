@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.unit.sp
 import com.checklisted.app.R
+import java.util.Locale
 
 /** Anton: a heavy condensed grotesque, bundled so the app never touches the network. */
 val NeoDisplayFamily = FontFamily(Font(R.font.anton_regular, FontWeight.Normal))
@@ -59,3 +60,12 @@ val NeoTypography = Typography(
  */
 fun TextStyle.condensed(scale: Float = 0.94f): TextStyle =
     copy(textGeometricTransform = TextGeometricTransform(scaleX = scale))
+
+/**
+ * Uppercases display text using the device locale.
+ *
+ * Kotlin's no-arg [String.uppercase] is locale-invariant (`Locale.ROOT`), which
+ * mangles Turkish and Azerbaijani dotted/dotless i. Every uppercase label in this
+ * design system — including user-entered goal titles — goes through here.
+ */
+fun String.displayUppercase(): String = uppercase(Locale.getDefault())

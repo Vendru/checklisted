@@ -10,11 +10,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
@@ -35,8 +38,9 @@ import com.checklisted.app.ui.theme.NeoTokens
  *
  * The press treatment in this design system is structural — the component travels
  * into the space its shadow occupied — and is produced by [neoSurface], which owns
- * both the border and the shadow. This exists purely to displace the Material
- * ripple, which the design forbids.
+ * both the border and the shadow. This is installed as `LocalIndication` by
+ * `NeoTheme`, so an ordinary `Modifier.clickable` anywhere in the tree is
+ * ripple-free without having to opt out.
  */
 object NeoNoIndication : IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode = Node()
@@ -45,6 +49,8 @@ object NeoNoIndication : IndicationNodeFactory {
         override fun ContentDrawScope.draw() = drawContent()
     }
 
+    // IndicationNodeFactory declares both as abstract so implementations cannot
+    // accidentally rely on identity; for an object, identity is the right answer.
     override fun hashCode(): Int = "NeoNoIndication".hashCode()
 
     override fun equals(other: Any?): Boolean = other === this
@@ -56,11 +62,19 @@ object NeoNoIndication : IndicationNodeFactory {
  *
  * While [pressed], the body travels [shadowOffset] in both axes and the shadow is
  * consumed by exactly as much, so the component reads as sinking onto its own
- * shadow. The travel runs on a 40 ms linear tween — this style has no room for
- * soft easing.
+ * shadow. The travel runs on a 40 ms linear tween — this style has no room for soft
+ * easing.
  *
- * The travel happens inside bounds reserved by the modifier itself, so pressing one
- * component never nudges its neighbours.
+ * The travel is applied **in the draw phase only**. Moving the component's
+ * placement instead would drag every descendant's layout bounds with it, including
+ * the pointer-input node of whatever click modifier is chained after this one: a
+ * finger that landed within [shadowOffset] of the leading edge would fall outside
+ * the node's recomputed local bounds and the gesture would be cancelled mid-press.
+ * Draw modifiers do not participate in hit testing, so translating here keeps the
+ * touch target exactly where the user aimed.
+ *
+ * The shadow gutter is reserved inside the component's own measured bounds, so
+ * pressing one component never nudges its neighbours.
  */
 @Composable
 fun Modifier.neoSurface(
@@ -79,14 +93,24 @@ fun Modifier.neoSurface(
         label = "neoPressTravel",
     )
     return this
+        // Covers fill, border and shadow alike, because everything below this node
+        // is drawn into the same layer.
+        .alpha(if (enabled) 1f else NeoTokens.DISABLED_ALPHA)
         .reserveShadowGutter(shadowOffset)
-        .travelBy(travel)
-        .drawBehind {
-            val remaining = shadowOffset.toPx() - travel.toPx()
-            if (remaining > 0f) {
-                val outline = shape.createOutline(size, layoutDirection, this)
-                translate(left = remaining, top = remaining) {
-                    drawOutline(outline, shadowColor)
+        .drawWithCache {
+            // Cached per size/shape rather than rebuilt on every draw pass — the
+            // press tween invalidates draw on each frame.
+            val outline = shape.createOutline(size, layoutDirection, this)
+            onDrawWithContent {
+                val travelPx = travel.toPx()
+                val remaining = shadowOffset.toPx() - travelPx
+                if (remaining > 0f) {
+                    translate(left = remaining, top = remaining) {
+                        drawOutline(outline, shadowColor)
+                    }
+                }
+                translate(left = travelPx, top = travelPx) {
+                    this@onDrawWithContent.drawContent()
                 }
             }
         }
@@ -95,9 +119,11 @@ fun Modifier.neoSurface(
 }
 
 /**
- * Applies a click handler with the ripple stripped out. Callers pair this with
- * [neoSurface] over a shared [interactionSource] so the press visual and the click
- * target stay in sync.
+ * Applies a click handler wired to the shared [interactionSource] so the press
+ * visual produced by [neoSurface] stays in sync with the gesture.
+ *
+ * `indication` is null rather than [NeoNoIndication]: the press treatment is
+ * already drawn by [neoSurface], so there is nothing left for an indication to do.
  */
 fun Modifier.neoClickable(
     interactionSource: MutableInteractionSource,
@@ -107,10 +133,53 @@ fun Modifier.neoClickable(
     onClick: () -> Unit,
 ): Modifier = clickable(
     interactionSource = interactionSource,
-    indication = NeoNoIndication,
+    indication = null,
     enabled = enabled,
     role = role,
     onClickLabel = onClickLabel,
+    onClick = onClick,
+)
+
+/**
+ * Checkbox-style toggle.
+ *
+ * Uses [toggleable] rather than [clickable] with `Role.Checkbox`: only `toggleable`
+ * writes `ToggleableState` into semantics, which is what a screen reader announces
+ * as checked/unchecked. A role alone carries no state.
+ */
+fun Modifier.neoToggleable(
+    value: Boolean,
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean = true,
+    role: Role? = Role.Checkbox,
+    onValueChange: (Boolean) -> Unit,
+): Modifier = toggleable(
+    value = value,
+    interactionSource = interactionSource,
+    indication = null,
+    enabled = enabled,
+    role = role,
+    onValueChange = onValueChange,
+)
+
+/**
+ * Single-choice option.
+ *
+ * Uses [selectable] rather than [clickable] with `Role.RadioButton`, for the same
+ * reason as [neoToggleable]: only `selectable` sets `SemanticsProperties.Selected`.
+ */
+fun Modifier.neoSelectable(
+    selected: Boolean,
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean = true,
+    role: Role? = Role.RadioButton,
+    onClick: () -> Unit,
+): Modifier = selectable(
+    selected = selected,
+    interactionSource = interactionSource,
+    indication = null,
+    enabled = enabled,
+    role = role,
     onClick = onClick,
 )
 
@@ -127,13 +196,5 @@ private fun Modifier.reserveShadowGutter(offset: Dp): Modifier = layout { measur
     val placeable = measurable.measure(constraints.offset(horizontal = -gutter, vertical = -gutter))
     layout(placeable.width + gutter, placeable.height + gutter) {
         placeable.place(0, 0)
-    }
-}
-
-/** Moves the drawn body by [travel] without disturbing the reserved bounds. */
-private fun Modifier.travelBy(travel: Dp): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    layout(placeable.width, placeable.height) {
-        placeable.place(travel.roundToPx(), travel.roundToPx())
     }
 }

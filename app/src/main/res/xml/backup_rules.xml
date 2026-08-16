@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Room runs in WAL mode on this minSdk, so committed transactions sit in the
+    -wal sidecar until a checkpoint. Backing up the .db alone would silently drop
+    the most recent completions on restore.
+-->
 <full-backup-content>
     <include domain="database" path="checklisted.db" />
+    <include domain="database" path="checklisted.db-wal" />
+    <include domain="database" path="checklisted.db-shm" />
     <include domain="file" path="datastore/" />
 </full-backup-content>

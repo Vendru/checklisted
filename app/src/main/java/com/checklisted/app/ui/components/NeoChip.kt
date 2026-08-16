@@ -3,24 +3,31 @@ package com.checklisted.app.ui.components
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
+import com.checklisted.app.ui.theme.NeoTokens
+import com.checklisted.app.ui.theme.displayUppercase
 
 /**
- * Compact toggle used for recurrence pickers and filters. The selected state is
- * carried by the fill, and the unselected state keeps the same border weight so
- * the row never shifts.
+ * Compact single-choice toggle used for recurrence pickers and filters.
+ *
+ * The selected state is carried by the fill, and the unselected state keeps the
+ * same border weight so the row never shifts.
  */
 @Composable
 fun NeoChip(
@@ -44,49 +51,47 @@ fun NeoChip(
                 enabled = enabled,
                 shadowOffset = 3.dp,
             )
-            .neoClickable(
+            .neoSelectable(
+                selected = selected,
                 interactionSource = interactionSource,
                 enabled = enabled,
-                role = Role.RadioButton,
                 onClick = onClick,
             )
-            .padding(horizontal = 14.dp, vertical = 9.dp),
+            .defaultMinSize(minHeight = NeoTokens.MinTouchTarget)
+            .padding(horizontal = 16.dp, vertical = 9.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = label.uppercase(),
+            text = label.displayUppercase(),
             style = MaterialTheme.typography.labelMedium,
             color = if (selected) colors.onAccent else colors.ink,
         )
     }
 }
 
-@Preview(name = "NeoChip claro", showBackground = true, backgroundColor = 0xFFFAF3E0)
+@NeoPreviews
 @Composable
-private fun NeoChipLightPreview() {
-    NeoTheme(darkTheme = false) {
-        PreviewStack { NeoChipSamples() }
-    }
-}
-
-@Preview(name = "NeoChip escuro", showBackground = true, backgroundColor = 0xFF14120F)
-@Composable
-private fun NeoChipDarkPreview() {
-    NeoTheme(darkTheme = true) {
-        PreviewStack { NeoChipSamples() }
-    }
+private fun NeoChipPreview() {
+    PreviewStack { NeoChipSamples() }
 }
 
 @Composable
-private fun NeoChipSamples() {
+internal fun NeoChipSamples() {
+    var selected by remember { mutableIntStateOf(0) }
+    val labels = listOf(
+        stringResource(R.string.recurrence_daily),
+        stringResource(R.string.recurrence_weekly),
+        stringResource(R.string.recurrence_monthly),
+    )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        NeoChip(label = "Diária", selected = true, onClick = {})
-        NeoChip(label = "Semanal", selected = false, onClick = {})
-        NeoChip(label = "Mensal", selected = false, onClick = {})
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        NeoChip(label = "Semanal", selected = true, onClick = {}, accent = NeoAccent.PURPLE)
-        NeoChip(label = "Mensal", selected = true, onClick = {}, accent = NeoAccent.ORANGE)
+        labels.forEachIndexed { index, label ->
+            NeoChip(
+                label = label,
+                selected = selected == index,
+                onClick = { selected = index },
+                accent = NeoAccent.entries[index],
+            )
+        }
     }
 }

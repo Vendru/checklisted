@@ -11,16 +11,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTeal
 import com.checklisted.app.ui.theme.NeoTheme
 
 /**
- * Container for a block of content. Optionally clickable — when [onClick] is null
- * the card is inert and carries no press treatment.
+ * Container for a block of content.
+ *
+ * Split into two bodies by whether it is clickable: an inert card is the common
+ * case (goal rows, empty states, stat blocks) and must not pay for an interaction
+ * source, a press collector and an idle animation that can never run.
  */
 @Composable
 fun NeoCard(
@@ -30,49 +34,67 @@ fun NeoCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (onClick == null) {
+        Column(
+            modifier = modifier
+                .neoSurface(color = color, shape = NeoShapes.medium)
+                .padding(contentPadding),
+            content = content,
+        )
+    } else {
+        ClickableNeoCard(
+            modifier = modifier,
+            color = color,
+            contentPadding = contentPadding,
+            onClick = onClick,
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun ClickableNeoCard(
+    modifier: Modifier,
+    color: Color,
+    contentPadding: PaddingValues,
+    onClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     val interactionSource = rememberNeoInteractionSource()
     val pressed by interactionSource.collectIsPressedAsState()
 
-    val clickModifier = if (onClick != null) {
-        Modifier.neoClickable(interactionSource = interactionSource, role = Role.Button, onClick = onClick)
-    } else {
-        Modifier
-    }
-
     Column(
         modifier = modifier
-            .neoSurface(color = color, shape = NeoShapes.medium, pressed = pressed && onClick != null)
-            .then(clickModifier)
+            .neoSurface(color = color, shape = NeoShapes.medium, pressed = pressed)
+            .neoClickable(interactionSource = interactionSource, role = Role.Button, onClick = onClick)
             .padding(contentPadding),
         content = content,
     )
 }
 
-@Preview(name = "NeoCard claro", showBackground = true, backgroundColor = 0xFFFAF3E0)
+@NeoPreviews
 @Composable
-private fun NeoCardLightPreview() {
-    NeoTheme(darkTheme = false) {
-        PreviewStack { NeoCardSamples() }
-    }
-}
-
-@Preview(name = "NeoCard escuro", showBackground = true, backgroundColor = 0xFF14120F)
-@Composable
-private fun NeoCardDarkPreview() {
-    NeoTheme(darkTheme = true) {
-        PreviewStack { NeoCardSamples() }
-    }
+private fun NeoCardPreview() {
+    PreviewStack { NeoCardSamples() }
 }
 
 @Composable
-private fun NeoCardSamples() {
+internal fun NeoCardSamples() {
     NeoCard {
-        Text("Beber 2L de água", style = MaterialTheme.typography.titleMedium)
-        Text("Todo santo dia, sem desculpa.", style = MaterialTheme.typography.bodyMedium)
+        // No explicit color: this is the case that used to fall back to
+        // Color.Black before NeoTheme started providing LocalContentColor.
+        Text(
+            text = stringResource(R.string.sample_goal_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = stringResource(R.string.sample_goal_description),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
     NeoCard(color = NeoTeal, onClick = {}) {
         Text(
-            text = "Card clicável",
+            text = stringResource(R.string.sample_card_clickable),
             style = MaterialTheme.typography.titleMedium,
             color = NeoTheme.colors.onAccent,
         )

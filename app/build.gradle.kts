@@ -7,12 +7,16 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+// Hoisted out of the filter lambda below: referencing `layout` inside the Spec
+// would capture the Project and break configuration cache serialization.
+val buildDirPath: String = layout.buildDirectory.get().asFile.path
+
 ktlint {
     version.set(libs.versions.ktlint.get())
     android.set(true)
     ignoreFailures.set(false)
     filter {
-        exclude { it.file.path.contains("${layout.buildDirectory.get()}") }
+        exclude { it.file.path.startsWith(buildDirPath) }
     }
 }
 
@@ -44,6 +48,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // The domain layer is built on java.time. minSdk 26 ships it, but desugaring
+        // backfills the parts of the API that arrived later, so device behaviour
+        // matches what the JVM unit tests exercise.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -61,14 +69,11 @@ android {
         }
     }
 
-    testOptions {
-        unitTests {
-            isReturnDefaultValues = true
-        }
-    }
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

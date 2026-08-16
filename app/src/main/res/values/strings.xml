@@ -22,11 +22,17 @@
     <!-- Campos -->
     <string name="field_title">Título</string>
     <string name="field_title_placeholder">Ex.: Ler 20 páginas</string>
+    <string name="field_description">Descrição</string>
+    <string name="error_title_required">Dá pra escrever alguma coisa aí.</string>
 
     <!-- Recorrência -->
     <string name="recurrence_daily">Diária</string>
     <string name="recurrence_weekly">Semanal</string>
     <string name="recurrence_monthly">Mensal</string>
+
+    <!-- Estados anunciados por leitores de tela -->
+    <string name="state_completed">Concluída</string>
+    <string name="state_not_completed">Não concluída</string>
 
     <!-- Diálogos -->
     <string name="dialog_delete_title">Excluir meta?</string>
@@ -35,4 +41,6 @@
     <!-- Amostras -->
     <string name="sample_goal_title">Beber 2L de água</string>
     <string name="sample_goal_description">Todo santo dia, sem desculpa.</string>
+    <string name="sample_goal_run">Correr 5 km</string>
+    <string name="sample_card_clickable">Card clicável</string>
 </resources>

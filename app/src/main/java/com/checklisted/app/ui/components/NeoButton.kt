@@ -12,13 +12,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
+import com.checklisted.app.ui.theme.displayUppercase
 
 /**
  * Primary action. Label is always uppercase — the design system has no
@@ -34,34 +35,18 @@ fun NeoButton(
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
-    val interactionSource = rememberNeoInteractionSource()
-    val pressed by interactionSource.collectIsPressedAsState()
-
-    Row(
-        modifier = modifier
-            .neoSurface(
-                color = if (enabled) accent.color else colors.surfaceMuted,
-                shape = NeoShapes.small,
-                pressed = pressed,
-                enabled = enabled,
-            )
-            .neoClickable(interactionSource = interactionSource, enabled = enabled, onClick = onClick)
-            .defaultMinSize(minHeight = NeoTokens.MinTouchTarget)
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-            .graphicsLayer { alpha = if (enabled) 1f else 0.55f },
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        leadingIcon?.invoke()
-        Text(
-            text = text.uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            color = if (enabled) colors.onAccent else colors.ink,
-        )
-    }
+    NeoButtonBody(
+        text = text,
+        onClick = onClick,
+        modifier = modifier,
+        fill = if (enabled) accent.color else colors.surfaceMuted,
+        contentColor = if (enabled) colors.onAccent else colors.ink,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+    )
 }
 
-/** Lower-emphasis variant: same structure, neutral fill. */
+/** Lower-emphasis variant: same body, neutral fill. */
 @Composable
 fun NeoOutlineButton(
     text: String,
@@ -69,50 +54,72 @@ fun NeoOutlineButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     fill: Color = NeoTheme.colors.surface,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val colors = NeoTheme.colors
+    NeoButtonBody(
+        text = text,
+        onClick = onClick,
+        modifier = modifier,
+        fill = fill,
+        contentColor = NeoTheme.colors.ink,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+    )
+}
+
+/**
+ * The one button body.
+ *
+ * Both public variants route through here so padding, touch target and the disabled
+ * treatment can only ever be changed in one place.
+ */
+@Composable
+private fun NeoButtonBody(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    fill: Color,
+    contentColor: Color,
+    enabled: Boolean,
+    leadingIcon: (@Composable () -> Unit)?,
+) {
     val interactionSource = rememberNeoInteractionSource()
     val pressed by interactionSource.collectIsPressedAsState()
 
     Row(
         modifier = modifier
-            .neoSurface(color = fill, shape = NeoShapes.small, pressed = pressed, enabled = enabled)
+            .neoSurface(
+                color = fill,
+                shape = NeoShapes.small,
+                pressed = pressed,
+                enabled = enabled,
+            )
             .neoClickable(interactionSource = interactionSource, enabled = enabled, onClick = onClick)
             .defaultMinSize(minHeight = NeoTokens.MinTouchTarget)
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-            .graphicsLayer { alpha = if (enabled) 1f else 0.55f },
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        leadingIcon?.invoke()
         Text(
-            text = text.uppercase(),
+            text = text.displayUppercase(),
             style = MaterialTheme.typography.labelLarge,
-            color = colors.ink,
+            color = contentColor,
         )
     }
 }
 
-@Preview(name = "NeoButton claro", showBackground = true, backgroundColor = 0xFFFAF3E0)
+@NeoPreviews
 @Composable
-private fun NeoButtonLightPreview() {
-    NeoTheme(darkTheme = false) {
-        PreviewStack {
-            NeoButton(text = "Nova meta", onClick = {})
-            NeoButton(text = "Concluir", onClick = {}, accent = NeoAccent.TEAL)
-            NeoButton(text = "Desativado", onClick = {}, enabled = false)
-            NeoOutlineButton(text = "Cancelar", onClick = {})
-        }
-    }
+private fun NeoButtonPreview() {
+    PreviewStack { NeoButtonSamples() }
 }
 
-@Preview(name = "NeoButton escuro", showBackground = true, backgroundColor = 0xFF14120F)
 @Composable
-private fun NeoButtonDarkPreview() {
-    NeoTheme(darkTheme = true) {
-        PreviewStack {
-            NeoButton(text = "Nova meta", onClick = {})
-            NeoButton(text = "Concluir", onClick = {}, accent = NeoAccent.TEAL)
-            NeoButton(text = "Desativado", onClick = {}, enabled = false)
-            NeoOutlineButton(text = "Cancelar", onClick = {})
-        }
-    }
+internal fun NeoButtonSamples() {
+    NeoButton(text = stringResource(R.string.action_new_goal), onClick = {})
+    NeoButton(text = stringResource(R.string.action_complete), onClick = {}, accent = NeoAccent.TEAL)
+    NeoOutlineButton(text = stringResource(R.string.action_cancel), onClick = {})
+    NeoButton(text = stringResource(R.string.action_disabled), onClick = {}, enabled = false)
+    NeoOutlineButton(text = stringResource(R.string.action_disabled), onClick = {}, enabled = false)
 }
