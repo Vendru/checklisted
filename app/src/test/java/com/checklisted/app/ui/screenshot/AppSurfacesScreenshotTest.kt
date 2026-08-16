@@ -20,17 +20,20 @@ import com.checklisted.app.domain.model.Goal
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.domain.model.PeriodKey
 import com.checklisted.app.domain.model.Recurrence
+import com.checklisted.app.domain.repository.Settings
 import com.checklisted.app.ui.components.NeoButton
 import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.NeoStatRow
+import com.checklisted.app.ui.settings.SettingsContent
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.today.GoalRow
 import org.junit.Rule
 import org.junit.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Renders the surfaces the user actually spends time on.
@@ -151,6 +154,26 @@ class AppSurfacesScreenshotTest {
             bestStreak = 31,
             ratePercent = 73,
             rateLabel = "Últimos 30 dias",
+        )
+    }
+
+    /**
+     * Locks the settings screen down.
+     *
+     * The five reminder-time chips overflowed a plain Row on a real phone and the
+     * last one was squeezed until its text wrapped one character per line. Nothing
+     * covered this screen, so nothing caught it.
+     */
+    @Test
+    fun settings() = bothThemes("configuracoes") {
+        SettingsContent(
+            settings = Settings(reminderEnabled = true, reminderTime = LocalTime.of(8, 0)),
+            permissionDenied = false,
+            onBack = {},
+            onWeekStartChange = {},
+            onThemeChange = {},
+            onReminderToggle = {},
+            onReminderTimeChange = {},
         )
     }
 
