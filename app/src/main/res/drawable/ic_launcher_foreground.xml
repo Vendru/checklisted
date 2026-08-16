@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A hard-edged check mark: same geometry as NeoCheckbox, mitred joins, no soft
+    caps. Stroke only — declaring a fillColor here would make VectorDrawable close
+    the open polyline and fill the triangle in the crook of the check.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:strokeColor="#000000"
+        android:strokeWidth="9"
+        android:strokeLineJoin="miter"
+        android:strokeLineCap="butt"
+        android:pathData="M33,55 L46,68 L78,36" />
+</vector>

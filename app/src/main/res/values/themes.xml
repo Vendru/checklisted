@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Launch theme only. All in-app styling lives in Compose (NeoTheme);
+        this exists so the cold-start window matches the cream ground instead
+        of flashing the platform default.
+    -->
+    <style name="Theme.Checklisted" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/neo_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

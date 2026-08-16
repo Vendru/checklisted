@@ -1,0 +1,160 @@
+# PLAN.md — Checklisted
+
+App Android nativo, offline-first, de checklist de metas com recorrência diária,
+semanal e mensal. Visual neobrutalista. Sem backend, sem login, sem rede.
+
+---
+
+## Decisões tomadas
+
+Respostas às perguntas em aberto, que fixam a lógica de domínio e os testes:
+
+| Tema | Decisão |
+| --- | --- |
+| **Streak** | O período atual em aberto é **neutro**. O streak conta os períodos fechados consecutivos e soma +1 se o período atual já estiver marcado. Não marcar hoje só quebra a sequência quando o dia virar. |
+| **Marcação retroativa** | **Permitida pela tela de Histórico**, sem limite de janela. O repositório aceita `periodKey` arbitrária; o heatmap é tocável. |
+| **Heatmap** | **Os dois escopos**: tela global de Histórico (por dia, quantas metas de N foram concluídas) + heatmap por meta na tela de detalhe. |
+| **Taxa de conclusão** | **Últimos N períodos da recorrência**: 30 dias para diárias, 4 semanas para semanais, 3 meses para mensais. O rótulo na UI muda junto com a recorrência. |
+
+Defaults assumidos (diga se quiser diferente):
+
+- `applicationId` / namespace: `com.checklisted.app`
+- Nome do app: **Checklisted**
+- Lembrete diário **global** (um só, não por meta), conforme o escopo da v1
+- Excluir meta faz **cascade** nas `Completion` (o histórico se preserva via
+  *arquivar*, que é a ação não destrutiva)
+- Linter: **ktlint** via `org.jlleitschuh.gradle.ktlint`, rodando no CI local
+  desde a Fase 1
+
+---
+
+## Arquitetura
+
+```
+app/src/main/java/com/checklisted/app/
+├── data/
+│   ├── local/          Room: entities, DAOs, database, converters
+│   ├── prefs/          DataStore: início da semana, tema, lembrete
+│   └── repository/     implementações dos contratos de domain
+├── domain/
+│   ├── model/          Goal, Completion, Recurrence, GoalWithStatus, Streak
+│   ├── period/         PeriodCalculator — periodKey, virada, iteração
+│   ├── repository/     interfaces
+│   └── usecase/        toggle, streak, taxa de conclusão, heatmap
+├── ui/
+│   ├── theme/          Color.kt, Type.kt, Shape.kt, NeoTheme.kt
+│   ├── components/     NeoButton, NeoCard, NeoCheckbox, NeoTextField,
+│   │                   NeoChip, NeoDialog, NeoProgressBar (+ @Preview)
+│   ├── today/          tela Hoje
+│   ├── goal/           criar/editar meta, detalhe da meta
+│   ├── history/        heatmap global
+│   └── settings/       preferências e lembrete
+├── work/               WorkManager: lembrete diário
+└── di/                 módulos Hilt
+```
+
+`domain/period` é **Kotlin puro** (sem dependência de Android) para rodar em
+testes JVM rápidos. Usa `java.time` com desugaring habilitado (minSdk 26 já tem
+`java.time`, mas o desugaring garante a API completa).
+
+### Regras de período
+
+- `periodKey` derivada do fuso local via um `Clock` injetável (testes usam
+  `Clock.fixed`, nunca `LocalDate.now()` solto).
+  - `DAILY` → `2026-08-16`
+  - `WEEKLY` → `2026-W33` (semana ISO, primeiro dia configurável)
+  - `MONTHLY` → `2026-08`
+- Marcar/desmarcar = inserir/remover uma `Completion`. **Virada de período nunca
+  apaga histórico.**
+- Reatividade da virada: um `Flow` de `periodKey` alimentado por um
+  `BroadcastReceiver` de `ACTION_DATE_CHANGED` / `ACTION_TIME_CHANGED` /
+  `ACTION_TIMEZONE_CHANGED`, mais revalidação em `onResume` (o receiver não é
+  garantido em Doze).
+
+---
+
+## Fases
+
+Cada fase termina com `./gradlew assembleDebug` e `./gradlew test` passando, um
+commit e um resumo para você antes de eu seguir.
+
+### Fase 1 — Projeto + design system ✅
+
+- Scaffold Gradle KTS com `libs.versions.toml`, minSdk 26 / targetSdk 35
+- Hilt, Room, DataStore, Navigation, WorkManager declarados
+- ktlint configurado
+- `ui/theme/`: paleta clara e escura, tipografia condensada uppercase, shapes 0–4.dp
+- Modificadores `neoBorder` / `neoShadow` (offset sólido 4.dp, zero blur) e uma
+  `Indication` própria que desloca +4.dp e some com a sombra ao pressionar
+- Os 7 componentes `Neo*`, cada um com `@Preview` claro e escuro
+- **Entregável:** app roda mostrando uma galeria dos componentes
+
+### Fase 2 — Persistência + lógica de período (testada) ✅
+
+- Entities `GoalEntity` / `CompletionEntity`, índice único `(goalId, periodKey)`
+- DAOs com `Flow`, repositórios, módulos Hilt
+- `PeriodCalculator` completo: chave por recorrência, limites do período,
+  iteração para trás, virada de ano em semana ISO
+- `StreakCalculator`: streak atual (período aberto neutro), recorde, taxa dos
+  últimos N períodos
+- **Testes unitários** de período e streak — casos de borda: 29–31 dez em semana
+  ISO, ano bissexto, mudança de fuso, semana começando no domingo, buraco no meio
+  do histórico, marcação retroativa
+- **Entregável:** `./gradlew test` verde, sem UI nova
+
+> **Nota sobre o início da semana.** A chave semanal usa regras ISO generalizadas
+> (`WeekFields.of(primeiroDia, 4)`), então funciona para segunda **e** domingo.
+> Trocar a configuração re-agrupa o histórico semanal: uma conclusão gravada sob
+> semana-começa-na-segunda pode cair numa semana de número diferente depois da
+> troca. Nada é apagado — o histórico é relido através da nova fronteira.
+
+### Fase 3 — Tela Hoje + CRUD
+
+- Hoje: três seções (Diárias / Semanais / Mensais), contador `3/5`,
+  `NeoProgressBar` chunky por seção
+- `NeoCheckbox` com haptic e animação de afundar na sombra
+- Criar / editar / arquivar / excluir (com `NeoDialog` de confirmação)
+- Reordenar por drag, persistindo `position`
+- Estados vazios ilustrados com texto com personalidade
+- Virada de período reativa ligada de ponta a ponta
+- **Entregável:** app usável
+
+### Fase 4 — Streaks + histórico
+
+- Tela de detalhe da meta: streak atual, recorde, taxa da janela correta,
+  heatmap dos últimos 3 meses **daquela meta**
+- Tela de Histórico global: grade por dia com intensidade proporcional
+- Toque na célula marca/desmarca o período retroativamente
+- **Entregável:** as duas telas navegáveis a partir de Hoje
+
+### Fase 5 — Lembretes + polimento
+
+- `DataStore`: horário do lembrete, início da semana, modo de tema
+- Tela de Configurações
+- WorkManager com `PeriodicWorkRequest` diária, notificação neobrutalista,
+  permissão `POST_NOTIFICATIONS` no Android 13+, reagendamento no boot
+- Passada final: contraste, acessibilidade (`contentDescription`, alvos de 48.dp),
+  zero warning novo de compilação
+- **Entregável:** definição de pronto cumprida
+
+---
+
+## Definição de pronto
+
+Estado após a Fase 2:
+
+- [x] `./gradlew assembleDebug` passando
+- [x] `./gradlew test` passando — 57 testes
+- [x] Nenhum warning novo de compilação
+- [x] `@Preview` para cada componente do design system
+- [x] ktlint sem violações
+
+Não verificado: **aparência**. O container não tem KVM, então não há emulador, e
+previews do Compose não renderizam headless. O visual só foi validado por leitura
+de código.
+
+---
+
+## Fora do escopo (v1)
+
+Contas, sync, widgets, subtarefas, gamificação.
