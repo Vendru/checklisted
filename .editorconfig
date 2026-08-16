@@ -23,6 +23,10 @@ ktlint_standard_function-signature = disabled
 # the closing paren of the previous call, which is much harder to scan.
 ktlint_standard_chain-method-continuation = disabled
 ktlint_standard_class-signature = disabled
+# Forcing `@Inject` onto its own line pushes the whole class body out by two
+# indents, which makes every DI-constructed class harder to read than the
+# annotation placement is worth.
+ktlint_standard_annotation = disabled
 
 [*.{xml,yml,yaml,toml}]
 indent_size = 4

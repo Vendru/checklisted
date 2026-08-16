@@ -63,6 +63,12 @@ android {
         compose = true
     }
 
+    // Schemas are checked in so migrations can be diffed against the previous
+    // version instead of guessed at.
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
