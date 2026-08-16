@@ -8,6 +8,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -36,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.checklisted.app.R
 import com.checklisted.app.domain.model.ThemeMode
 import com.checklisted.app.domain.model.WeekStart
+import com.checklisted.app.domain.repository.Settings
 import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
@@ -51,6 +54,7 @@ private val REMINDER_TIMES = listOf(
     LocalTime.of(22, 0),
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -72,6 +76,39 @@ fun SettingsScreen(
         // setting. The worker checks the permission again before posting.
         viewModel.setReminderEnabled(true)
     }
+
+    SettingsContent(
+        settings = state.settings,
+        permissionDenied = permissionDenied,
+        onBack = onBack,
+        onWeekStartChange = viewModel::setWeekStart,
+        onThemeChange = viewModel::setThemeMode,
+        onReminderToggle = { enabled ->
+            if (enabled && needsNotificationPermission(context)) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                permissionDenied = false
+                viewModel.setReminderEnabled(enabled)
+            }
+        },
+        onReminderTimeChange = viewModel::setReminderTime,
+        modifier = modifier,
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun SettingsContent(
+    settings: Settings,
+    permissionDenied: Boolean,
+    onBack: () -> Unit,
+    onWeekStartChange: (WeekStart) -> Unit,
+    onThemeChange: (ThemeMode) -> Unit,
+    onReminderToggle: (Boolean) -> Unit,
+    onReminderTimeChange: (LocalTime) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = NeoTheme.colors
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -102,24 +139,30 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_week_start),
             hint = stringResource(R.string.settings_week_start_hint),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 WeekStart.entries.forEach { option ->
                     NeoChip(
                         label = stringResource(option.labelRes()),
-                        selected = state.settings.weekStart == option,
-                        onClick = { viewModel.setWeekStart(option) },
+                        selected = settings.weekStart == option,
+                        onClick = { onWeekStartChange(option) },
                     )
                 }
             }
         }
 
         SettingsSection(title = stringResource(R.string.settings_theme)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ThemeMode.entries.forEach { option ->
                     NeoChip(
                         label = stringResource(option.labelRes()),
-                        selected = state.settings.themeMode == option,
-                        onClick = { viewModel.setThemeMode(option) },
+                        selected = settings.themeMode == option,
+                        onClick = { onThemeChange(option) },
                     )
                 }
             }
@@ -134,16 +177,9 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 NeoCheckbox(
-                    checked = state.settings.reminderEnabled,
+                    checked = settings.reminderEnabled,
                     contentDescription = stringResource(R.string.settings_reminder_enable),
-                    onCheckedChange = { enabled ->
-                        if (enabled && needsNotificationPermission(context)) {
-                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            permissionDenied = false
-                            viewModel.setReminderEnabled(enabled)
-                        }
-                    },
+                    onCheckedChange = onReminderToggle,
                 )
                 Text(
                     text = stringResource(R.string.settings_reminder_enable),
@@ -160,18 +196,21 @@ fun SettingsScreen(
                 )
             }
 
-            if (state.settings.reminderEnabled) {
+            if (settings.reminderEnabled) {
                 Text(
                     text = stringResource(R.string.settings_reminder_time),
                     style = MaterialTheme.typography.labelMedium,
                     color = colors.ink,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     REMINDER_TIMES.forEach { time ->
                         NeoChip(
                             label = "%02d:%02d".format(time.hour, time.minute),
-                            selected = state.settings.reminderTime == time,
-                            onClick = { viewModel.setReminderTime(time) },
+                            selected = settings.reminderTime == time,
+                            onClick = { onReminderTimeChange(time) },
                         )
                     }
                 }
