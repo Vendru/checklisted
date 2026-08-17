@@ -101,7 +101,7 @@ internal fun GoalDetailContent(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.ink,
+                    color = colors.inkSoft,
                 )
             }
 
@@ -112,20 +112,25 @@ internal fun GoalDetailContent(
                 rateLabel = stringResource(goal.recurrence.rateLabelRes()),
             )
 
-            Text(
-                text = stringResource(R.string.detail_heatmap_title),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.ink,
-            )
-            Text(
-                text = stringResource(R.string.detail_heatmap_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.ink,
-            )
-            NeoHeatmap(
-                days = state.heatmap,
-                onDayClick = { day -> onDayClick(day.date) },
-            )
+            // Title, hint and grid are one block. At the column's 20.dp they read as
+            // three unrelated things stacked.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = stringResource(R.string.detail_heatmap_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.ink,
+                )
+                Text(
+                    text = stringResource(R.string.detail_heatmap_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.inkSoft,
+                    modifier = Modifier.padding(bottom = 6.dp),
+                )
+                NeoHeatmap(
+                    days = state.heatmap,
+                    onDayClick = { day -> onDayClick(day.date) },
+                )
+            }
 
             NeoOutlineButton(
                 text = stringResource(R.string.action_edit),

@@ -17,10 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
-import com.checklisted.app.ui.theme.NeoTokens
 
 /**
  * Illustrated empty state.
@@ -34,7 +32,6 @@ fun NeoEmptyState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
-    accent: NeoAccent = NeoAccent.Default,
     action: (@Composable () -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
@@ -46,7 +43,7 @@ fun NeoEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        EmptyBoxMark(accent = accent)
+        EmptyBoxMark()
 
         Text(
             text = title,
@@ -64,38 +61,49 @@ fun NeoEmptyState(
     }
 }
 
+/**
+ * An unfilled box on the page's own paper.
+ *
+ * It used to be 88.dp of solid accent, which made the heaviest block on an empty
+ * screen the illustration rather than the button that gets the user out of it. The
+ * tick carries the action colour instead — the same 3:1 it needs anywhere else, which
+ * a filled tag colour would not clear on a white card.
+ */
 @Composable
-private fun EmptyBoxMark(accent: NeoAccent) {
+private fun EmptyBoxMark() {
     val colors = NeoTheme.colors
     Column(
         modifier = Modifier
-            .neoSurface(color = accent.color, shape = NeoShapes.medium)
-            .size(88.dp),
+            .neoSurface(color = colors.surface, shape = NeoShapes.medium)
+            .size(80.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Canvas(modifier = Modifier.size(44.dp)) {
+        Canvas(modifier = Modifier.size(40.dp)) {
             // The same tick geometry NeoCheckbox draws, with the long leg left as
             // dashes: the box is half-drawn, waiting to be finished.
             val w = size.width
             val h = size.height
-            val stroke = NeoTokens.BorderWidth.toPx()
+            val stroke = MarkStroke.toPx()
             val start = Offset(w * 0.20f, h * 0.50f)
             val elbow = Offset(w * 0.42f, h * 0.74f)
             val end = Offset(w * 0.82f, h * 0.24f)
 
-            drawLine(colors.onAction, start, elbow, stroke, StrokeCap.Square)
+            drawLine(colors.action, start, elbow, stroke, StrokeCap.Square)
 
             fun along(t: Float) = Offset(
                 x = elbow.x + (end.x - elbow.x) * t,
                 y = elbow.y + (end.y - elbow.y) * t,
             )
             listOf(0.04f to 0.24f, 0.44f to 0.64f, 0.84f to 1f).forEach { (from, to) ->
-                drawLine(colors.onAction, along(from), along(to), stroke, StrokeCap.Square)
+                drawLine(colors.action, along(from), along(to), stroke, StrokeCap.Square)
             }
         }
     }
 }
+
+/** Heavier than a border: at this size the design system's 1.5.dp reads as a hairline. */
+private val MarkStroke = 3.dp
 
 @NeoPreviews
 @Composable

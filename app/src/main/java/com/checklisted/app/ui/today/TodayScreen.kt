@@ -134,11 +134,14 @@ internal fun TodayContent(
             .fillMaxSize()
             .background(colors.background),
     ) {
+        // Spacing is per item, not per section: a list arrangement of 20.dp applied
+        // between every row too, so consecutive goals sat 30.dp apart and three goals
+        // filled a screen. Sections get their air from the header's own top padding.
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = listInsets,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(RowGap),
         ) {
             item(key = HEADER_KEY) {
                 Row(
@@ -244,8 +247,7 @@ private fun LazyListScope.todaySection(
             modifier = Modifier
                 .zIndex(if (dragging) 1f else 0f)
                 .dragOffset(reorderState.offsetFor(status.goal.id))
-                .reorderable(state = reorderState, key = status.goal.id, onDragStarted = onDragStarted)
-                .padding(bottom = 10.dp),
+                .reorderable(state = reorderState, key = status.goal.id, onDragStarted = onDragStarted),
         )
     }
 }
@@ -254,7 +256,10 @@ private fun LazyListScope.todaySection(
 private fun SectionHeader(section: TodaySection) {
     val colors = NeoTheme.colors
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = Modifier.padding(top = SectionGap),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -304,6 +309,12 @@ private fun Recurrence.emptyMessageRes() = when (this) {
     Recurrence.WEEKLY -> R.string.empty_section_weekly
     Recurrence.MONTHLY -> R.string.empty_section_monthly
 }
+
+/** Between two goals in the same section. */
+private val RowGap = 10.dp
+
+/** Added on top of [RowGap] before a section heading. */
+private val SectionGap = 14.dp
 
 /** Button height plus its offset from the corner, rounded up. */
 private val FabGutter = 60.dp
