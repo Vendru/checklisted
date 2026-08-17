@@ -91,9 +91,12 @@ fun NeoHeatmap(
                 repeat(weeks) { week ->
                     val day = days.getOrNull(week * DAYS_PER_WEEK + weekday)
                     if (day == null) {
-                        // A trailing partial week: hold the column so the grid stays
-                        // rectangular instead of the last row stretching.
-                        Spacer(modifier = Modifier.weight(1f))
+                        // The rest of the current week. The record stops at today, so
+                        // on a Monday the last column holds one single day: an invisible
+                        // spacer here left the top row jutting a whole cell past every
+                        // row below it, which reads as a broken grid rather than as a
+                        // week that has not happened yet.
+                        UpcomingCell(modifier = Modifier.weight(1f))
                     } else {
                         HeatmapCell(
                             day = day,
@@ -145,6 +148,23 @@ private fun MonthAxis(days: List<HeatmapDay>, weeks: Int, locale: Locale) {
             )
         }
     }
+}
+
+/**
+ * A day that has not arrived yet.
+ *
+ * Same square as an empty day so the grid keeps its edges, but it carries no date, no
+ * tap and no description: there is nothing to mark and nothing to announce.
+ */
+@Composable
+private fun UpcomingCell(modifier: Modifier = Modifier) {
+    val colors = NeoTheme.colors
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .background(colors.dataLow, NeoShapes.extraSmall)
+            .border(NeoTokens.HairlineBorder, colors.divider, NeoShapes.extraSmall),
+    )
 }
 
 @Composable

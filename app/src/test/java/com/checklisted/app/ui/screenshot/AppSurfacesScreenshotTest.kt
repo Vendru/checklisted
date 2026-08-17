@@ -179,11 +179,13 @@ class AppSurfacesScreenshotTest {
 
     @Test
     fun heatmap() = bothThemes("heatmap") {
-        // Twelve weeks ending on a Sunday, with a deliberate mix of intensities and a
-        // stretch of untracked days before the goals existed.
+        // Twelve weeks and two days, with a mix of intensities and a stretch of
+        // untracked days before the goals existed. The partial last column is the
+        // point: a range of exactly twelve weeks never exercises it, and the app only
+        // passes a whole number of weeks on one weekday out of seven.
         val start = LocalDate.parse("2026-05-25")
         val pattern = listOf(3, 3, 2, 0, 1, 3, 2, 0, 3, 3, 3, 1, 0, 2)
-        val days = (0 until 84).map { offset ->
+        val days = (0 until 86).map { offset ->
             HeatmapDay(
                 date = start.plusDays(offset.toLong()),
                 completed = if (offset < 9) 0 else pattern[offset % pattern.size],

@@ -36,6 +36,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.temporal.ChronoUnit
 
 /**
  * Whole screens, at real device size, with the amount of data a used app holds.
@@ -58,7 +59,8 @@ class FullScreenScreenshotTest {
         showSystemUi = false,
     )
 
-    private val today = LocalDate.parse("2026-08-16")
+    /** A Monday: the first day of a week, so the trailing column is at its shortest. */
+    private val today = LocalDate.parse("2026-08-17")
 
     private fun screen(name: String, dark: Boolean, content: @Composable () -> Unit) {
         paparazzi.snapshot(name = name) {
@@ -90,11 +92,18 @@ class FullScreenScreenshotTest {
     private fun status(goal: Goal, key: String, completed: Boolean) =
         GoalStatus(goal = goal, periodKey = PeriodKey(key), isCompleted = completed)
 
-    /** Thirteen weeks aligned to a Monday, which is what the app actually passes. */
+    /**
+     * The window the app actually passes: week-aligned at the start, ending at today.
+     *
+     * Deliberately **not** a multiple of seven. [today] is a Monday, so the last column
+     * holds a single day — the case that put one cell of the top row outside the grid
+     * on a real phone, and the case a tidy thirteen-week range hides.
+     */
     private fun heatmap(): List<HeatmapDay> {
         val start = LocalDate.parse("2026-05-18")
+        val days = ChronoUnit.DAYS.between(start, today).toInt() + 1
         val pattern = listOf(3, 2, 0, 1, 3, 3, 2, 0, 0, 1, 3, 2, 3, 0)
-        return (0 until 91).map { offset ->
+        return (0 until days).map { offset ->
             HeatmapDay(
                 date = start.plusDays(offset.toLong()),
                 completed = if (offset < 14) 0 else pattern[offset % pattern.size],
@@ -105,7 +114,7 @@ class FullScreenScreenshotTest {
 
     @Test
     fun todayFull() = bothThemes("tela-hoje") {
-        val daily = PeriodKey("2026-08-16").value
+        val daily = PeriodKey("2026-08-17").value
         TodayContent(
             state = TodayUiState(
                 date = today,
@@ -132,10 +141,10 @@ class FullScreenScreenshotTest {
                     ),
                     TodaySection(
                         recurrence = Recurrence.WEEKLY,
-                        periodKey = PeriodKey("2026-W33"),
+                        periodKey = PeriodKey("2026-W34"),
                         goals = listOf(
-                            status(goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"), "2026-W33", false),
-                            status(goal("e", "Ligar para a mãe", Recurrence.WEEKLY, "ORANGE"), "2026-W33", true),
+                            status(goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"), "2026-W34", false),
+                            status(goal("e", "Ligar para a mãe", Recurrence.WEEKLY, "ORANGE"), "2026-W34", true),
                         ),
                     ),
                     TodaySection(
@@ -240,7 +249,7 @@ class FullScreenScreenshotTest {
                         ),
                         DayGoal(
                             goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"),
-                            PeriodKey("2026-W33"),
+                            PeriodKey("2026-W34"),
                             false,
                         ),
                     ),
