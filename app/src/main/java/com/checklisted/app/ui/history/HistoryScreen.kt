@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.checklisted.app.R
+import com.checklisted.app.ui.AppLocale
 import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoDialog
@@ -34,7 +35,6 @@ import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Locale
 
 @Composable
 fun HistoryScreen(
@@ -43,6 +43,27 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    HistoryContent(
+        state = state,
+        onBack = onBack,
+        onDayClick = viewModel::selectDay,
+        onToggle = viewModel::toggle,
+        onDismissDay = viewModel::dismissDay,
+        modifier = modifier,
+    )
+}
+
+/** The screen without its view model, so a screenshot can render it. */
+@Composable
+internal fun HistoryContent(
+    state: HistoryUiState,
+    onBack: () -> Unit,
+    onDayClick: (java.time.LocalDate) -> Unit,
+    onToggle: (DayGoal) -> Unit,
+    onDismissDay: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = NeoTheme.colors
 
     val insets = WindowInsets.systemBars
@@ -83,7 +104,7 @@ fun HistoryScreen(
             )
             NeoHeatmap(
                 days = state.heatmap,
-                onDayClick = { day -> viewModel.selectDay(day.date) },
+                onDayClick = { day -> onDayClick(day.date) },
             )
         }
     }
@@ -92,38 +113,54 @@ fun HistoryScreen(
     if (selected != null) {
         NeoDialog(
             title = selected.date.format(
-                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()),
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(AppLocale),
             ),
             message = stringResource(R.string.history_day_hint),
             dismissText = stringResource(R.string.action_close),
-            onDismissRequest = viewModel::dismissDay,
+            onDismissRequest = onDismissDay,
         ) {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 320.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            DayGoalList(goals = selected.goals, onToggle = onToggle)
+        }
+    }
+}
+
+/**
+ * The checkable goals inside the day sheet.
+ *
+ * Its own composable so a screenshot can put it in a dialog body directly: Paparazzi
+ * pins a real dialog window to a fixed width and clips anything wider, which hides
+ * exactly the wrapping this list needs to be checked for.
+ */
+@Composable
+internal fun DayGoalList(
+    goals: List<DayGoal>,
+    onToggle: (DayGoal) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .heightIn(max = 320.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        goals.forEach { dayGoal ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                selected.goals.forEach { dayGoal ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        NeoCheckbox(
-                            checked = dayGoal.isCompleted,
-                            onCheckedChange = { viewModel.toggle(dayGoal) },
-                            accent = NeoAccent.fromTag(dayGoal.goal.colorTag),
-                            contentDescription = dayGoal.goal.title,
-                        )
-                        Text(
-                            text = dayGoal.goal.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = NeoTheme.colors.ink,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
+                NeoCheckbox(
+                    checked = dayGoal.isCompleted,
+                    onCheckedChange = { onToggle(dayGoal) },
+                    accent = NeoAccent.fromTag(dayGoal.goal.colorTag),
+                    contentDescription = dayGoal.goal.title,
+                )
+                Text(
+                    text = dayGoal.goal.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = NeoTheme.colors.ink,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }

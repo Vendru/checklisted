@@ -76,8 +76,13 @@ fun TodayScreen(
     )
 }
 
+/**
+ * The screen without its view model, so a screenshot can render it with a realistic
+ * list. Component-level images missed a full-height grid and an overflowing chip row;
+ * whole screens with real data are what catch that class of defect.
+ */
 @Composable
-private fun TodayContent(
+internal fun TodayContent(
     state: TodayUiState,
     onToggle: (GoalStatus) -> Unit,
     onOpenGoal: (String) -> Unit,
@@ -113,8 +118,15 @@ private fun TodayContent(
         }
     }
 
-    val insets = WindowInsets.systemBars
+    val screenInsets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
+    val insets = screenInsets.asPaddingValues()
+
+    // The new-goal button floats over the list, so the list has to be able to scroll
+    // past it. Without this the last goal of the last section sits permanently under
+    // the button and can never be reached.
+    val listInsets = screenInsets
+        .add(WindowInsets(bottom = if (state.hasNoGoals) 0.dp else FabGutter))
         .asPaddingValues()
 
     Box(
@@ -125,7 +137,7 @@ private fun TodayContent(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = insets,
+            contentPadding = listInsets,
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item(key = HEADER_KEY) {
@@ -292,6 +304,9 @@ private fun Recurrence.emptyMessageRes() = when (this) {
     Recurrence.WEEKLY -> R.string.empty_section_weekly
     Recurrence.MONTHLY -> R.string.empty_section_monthly
 }
+
+/** Button height plus its offset from the corner, rounded up. */
+private val FabGutter = 60.dp
 
 private const val HEADER_KEY = "today-header"
 private const val EMPTY_KEY = "today-empty"

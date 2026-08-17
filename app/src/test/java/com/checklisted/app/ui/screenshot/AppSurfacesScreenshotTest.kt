@@ -45,7 +45,7 @@ import java.time.LocalTime
 class AppSurfacesScreenshotTest {
     @get:Rule
     val paparazzi = Paparazzi(
-        deviceConfig = DeviceConfig.PIXEL_6,
+        deviceConfig = DeviceConfig.PIXEL_6.copy(locale = "pt-rBR"),
         renderingMode = SessionParams.RenderingMode.SHRINK,
         showSystemUi = false,
     )

@@ -30,8 +30,8 @@ import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoStatRow
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
+import java.time.LocalDate
 
 @Composable
 fun GoalDetailScreen(
@@ -47,10 +47,27 @@ fun GoalDetailScreen(
         if (state.isMissing) onBack()
     }
 
+    GoalDetailContent(
+        state = state,
+        onBack = onBack,
+        onEdit = onEdit,
+        onDayClick = viewModel::toggleDay,
+        modifier = modifier,
+    )
+}
+
+/** The screen without its view model, so a screenshot can render it. */
+@Composable
+internal fun GoalDetailContent(
+    state: GoalDetailUiState,
+    onBack: () -> Unit,
+    onEdit: (String) -> Unit,
+    onDayClick: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val goal = state.goal
     val stats = state.stats
     val colors = NeoTheme.colors
-    val accent = NeoAccent.fromTag(goal?.colorTag)
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -93,7 +110,6 @@ fun GoalDetailScreen(
                 bestStreak = stats.bestStreak,
                 ratePercent = stats.completionRate.percent,
                 rateLabel = stringResource(goal.recurrence.rateLabelRes()),
-                accent = accent,
             )
 
             Text(
@@ -108,7 +124,7 @@ fun GoalDetailScreen(
             )
             NeoHeatmap(
                 days = state.heatmap,
-                onDayClick = { day -> viewModel.toggleDay(day.date) },
+                onDayClick = { day -> onDayClick(day.date) },
             )
 
             NeoOutlineButton(

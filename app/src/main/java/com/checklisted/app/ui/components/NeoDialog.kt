@@ -6,13 +6,15 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -20,6 +22,9 @@ import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
+
+private val DialogMaxWidth = 380.dp
+private val DialogMargin = 24.dp
 
 /**
  * Modal used for destructive confirmations and small pickers.
@@ -39,13 +44,24 @@ fun NeoDialog(
     confirmAccent: NeoAccent? = null,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
+    // Turning off the platform width means nothing stops the box from growing past the
+    // display: 380.dp of content inside 24.dp of margin needs 428.dp, and the narrow
+    // phones this app targets are 360.dp across, so the closing button was rendered off
+    // the right edge. The width comes from the screen rather than from the incoming
+    // constraints, which a dialog window does not reliably supply — and it is a fixed
+    // width, not a maximum, because a wrap-content window measured the text against the
+    // cap and then placed the box narrower, slicing the last letter off every line.
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val width = minOf(DialogMaxWidth, screenWidth - DialogMargin * 2)
+
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         NeoDialogContent(
             title = title,
-            modifier = modifier.padding(24.dp),
+            modifier = modifier,
+            width = width,
             message = message,
             confirmText = confirmText,
             onConfirm = onConfirm,
@@ -60,14 +76,15 @@ fun NeoDialog(
 /**
  * The dialog container, minus the window.
  *
- * Extracted so the preview renders the real thing — Android Studio's preview surface
- * does not host actual [Dialog] windows, and a hand-copied stand-in would drift from
- * the shipped spacing.
+ * Extracted so the preview and the screenshots render the real thing — neither Android
+ * Studio's preview surface nor Paparazzi hosts an actual [Dialog] window at the size a
+ * device gives it, and a hand-copied stand-in would drift from the shipped spacing.
  */
 @Composable
-private fun NeoDialogContent(
+internal fun NeoDialogContent(
     title: String,
     modifier: Modifier = Modifier,
+    width: Dp = DialogMaxWidth,
     message: String? = null,
     confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
@@ -80,7 +97,7 @@ private fun NeoDialogContent(
 
     Column(
         modifier = modifier
-            .widthIn(max = 380.dp)
+            .width(width)
             .neoSurface(color = colors.surface, shape = NeoShapes.medium)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

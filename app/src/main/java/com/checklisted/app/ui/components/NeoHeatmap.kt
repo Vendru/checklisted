@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -18,15 +19,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.checklisted.app.R
 import com.checklisted.app.domain.history.HeatmapDay
+import com.checklisted.app.ui.AppLocale
 import com.checklisted.app.ui.theme.NeoColors
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
 import java.time.LocalDate
+import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -58,7 +64,7 @@ fun NeoHeatmap(
     val colors = NeoTheme.colors
     if (days.isEmpty()) return
 
-    val locale = Locale.getDefault()
+    val locale = AppLocale
     val weeks = (days.size + DAYS_PER_WEEK - 1) / DAYS_PER_WEEK
     val firstDate = days.first().date
 
@@ -66,6 +72,8 @@ fun NeoHeatmap(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(CellGap),
     ) {
+        MonthAxis(days = days, weeks = weeks, locale = locale)
+
         repeat(DAYS_PER_WEEK) { weekday ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -98,6 +106,44 @@ fun NeoHeatmap(
         }
 
         Legend(colors = colors)
+    }
+}
+
+/**
+ * Names the month over the column where it starts.
+ *
+ * Without it the grid is thirteen anonymous columns: the user can see that a week was
+ * good but not which week it was. A month is written once, above its first column,
+ * and the columns that continue it are left blank.
+ */
+@Composable
+private fun MonthAxis(days: List<HeatmapDay>, weeks: Int, locale: Locale) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(CellGap),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Spacer(modifier = Modifier.width(LabelWidth))
+        var previousMonth: Month? = null
+        repeat(weeks) { week ->
+            val month = days.getOrNull(week * DAYS_PER_WEEK)?.date?.month
+            val label = if (month != null && month != previousMonth) {
+                month.getDisplayName(TextStyle.SHORT, locale).take(3)
+            } else {
+                ""
+            }
+            if (month != null) previousMonth = month
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = NeoTheme.colors.inkSoft,
+                maxLines = 1,
+                overflow = TextOverflow.Visible,
+                softWrap = false,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
@@ -144,10 +190,18 @@ private fun cellColor(day: HeatmapDay, colors: NeoColors): Color = when {
 @Composable
 private fun Legend(colors: NeoColors) {
     Row(
+        modifier = Modifier.padding(top = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(LabelWidth))
+        // Four unlabelled squares read as decoration. Naming the ends says they are a
+        // scale and which way it runs.
+        Text(
+            text = stringResource(R.string.heatmap_legend_less),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.inkSoft,
+        )
         listOf(
             colors.dataLow,
             lerp(colors.dataLow, colors.dataHigh, 0.4f),
@@ -161,6 +215,11 @@ private fun Legend(colors: NeoColors) {
                     .border(NeoTokens.HairlineBorder, colors.divider, NeoShapes.extraSmall),
             )
         }
+        Text(
+            text = stringResource(R.string.heatmap_legend_more),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.inkSoft,
+        )
     }
 }
 

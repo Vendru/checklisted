@@ -66,6 +66,8 @@
     <string name="history_day_hint">Marque o que ficou para trás. Metas semanais e mensais valem para o período inteiro.</string>
     <string name="empty_history_title">Sem histórico ainda</string>
     <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
+    <string name="heatmap_legend_less">menos</string>
+    <string name="heatmap_legend_more">mais</string>
 
     <!-- Configurações -->
     <string name="settings_title">Configurações</string>
