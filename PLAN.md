@@ -170,7 +170,7 @@ commit e um resumo para você antes de eu seguir.
 Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 137 testes
+- [x] `./gradlew test` passando — 138 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações

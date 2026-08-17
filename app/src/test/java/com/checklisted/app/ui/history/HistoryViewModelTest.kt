@@ -99,7 +99,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `opening a day lists the goals that existed on it`() = runTest(dispatcher) {
+    fun `opening a day lists every goal, including ones younger than the day`() = runTest(dispatcher) {
         goalRepository.goals.value = listOf(
             goal("old"),
             goal("new", createdAt = Instant.parse("2026-08-10T00:00:00Z")),
@@ -109,8 +109,12 @@ class HistoryViewModelTest {
 
         viewModel.selectDay(LocalDate.parse("2026-08-05"))
 
+        // This used to list only "old", which read as correct and was not: the sheet is
+        // the only way to mark a past day, retroactive marking has no window limit, and
+        // filtering left it empty for anyone whose goals were younger than the day they
+        // had tapped — the common case in a first week of use.
         val selected = viewModel.uiState.first { it.selectedDay != null }.selectedDay!!
-        assertEquals(listOf("old"), selected.goals.map { it.goal.id })
+        assertEquals(listOf("old", "new"), selected.goals.map { it.goal.id })
     }
 
     @Test

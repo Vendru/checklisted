@@ -212,7 +212,11 @@ private fun HeatmapCell(
         stringResource(R.string.a11y_heatmap_day_untracked, spokenDate)
     }
 
-    val clickModifier = if (onClick != null && day.isTracked) {
+    // Every day in the window is tappable, tracked or not. Gating this on isTracked
+    // made the whole grid inert for anyone whose goals were younger than the window —
+    // which is everyone in their first three months — while the hint underneath went
+    // on inviting them to tap. Retroactive marking has no window limit by design.
+    val clickModifier = if (onClick != null) {
         Modifier.neoClickable(interactionSource = interactionSource) { onClick(day) }
     } else {
         Modifier

@@ -80,6 +80,26 @@ class HistoryCalculatorTest {
         assertEquals(0f, days.first().fraction, 0f)
     }
 
+    /**
+     * Retroactive marking has no window limit, so a day older than the goal has to be
+     * able to light up. Skipping it outright left a tapped cell looking untouched.
+     */
+    @Test
+    fun `a day older than the goal counts once it carries a completion`() {
+        val days = calculator.heatmap(
+            goals = listOf(goal(createdOn = "2026-08-14", completed = setOf(PeriodKey("2026-08-10")))),
+            from = date("2026-08-10"),
+            to = date("2026-08-11"),
+        )
+
+        assertEquals(1, days[0].completed)
+        assertEquals(1, days[0].total)
+        assertTrue(days[0].isTracked)
+        // The day beside it has nothing on it and still reads as before the goal.
+        assertEquals(0, days[1].total)
+        assertFalse(days[1].isTracked)
+    }
+
     @Test
     fun `the day a goal is created already counts`() {
         val days = calculator.heatmap(

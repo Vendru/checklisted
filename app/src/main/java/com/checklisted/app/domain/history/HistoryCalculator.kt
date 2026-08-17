@@ -44,9 +44,14 @@ class HistoryCalculator(
             var completed = 0
             var total = 0
             goals.forEach { goal ->
-                if (goal.createdOn.isAfter(date)) return@forEach
+                val done = periods.periodKey(goal.recurrence, date) in goal.completedKeys
+                // Predating the goal only hides a day that has nothing on it. Marking
+                // one retroactively is allowed, and a marked day that stayed blank
+                // because the goal was younger than it would just look like the tap
+                // had failed.
+                if (goal.createdOn.isAfter(date) && !done) return@forEach
                 total++
-                if (periods.periodKey(goal.recurrence, date) in goal.completedKeys) completed++
+                if (done) completed++
             }
             HeatmapDay(date = date, completed = completed, total = total)
         }

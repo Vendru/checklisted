@@ -96,8 +96,10 @@ class HistoryViewModel @Inject constructor(
                     selectedDay = selected?.let { day ->
                         SelectedDay(
                             date = day,
-                            goals = goals
-                                .filter { !it.createdAt.atZone(zoneProvider.current()).toLocalDate().isAfter(day) }
+                            // Not filtered by creation date: the sheet is how a day
+                            // gets marked, and filtering left it empty for every day
+                            // older than the goals — with no way to say why.
+                            goals
                                 .map { goal ->
                                     val key = periodCalculator.periodKey(goal.recurrence, day)
                                     DayGoal(
