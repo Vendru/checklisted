@@ -65,8 +65,10 @@ internal fun ArchivedGoalsContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = NeoTheme.colors
-    // By id and saved, so a rotation does not drop a destructive confirmation.
+    // Saved, and carrying the title rather than looking it up: the dialog must not
+    // need the list to have loaded before it can draw itself.
     var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingDeleteTitle by rememberSaveable { mutableStateOf("") }
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -113,23 +115,26 @@ internal fun ArchivedGoalsContent(
                 ArchivedGoalCard(
                     goal = goal,
                     onUnarchive = { onUnarchive(goal.id) },
-                    onDelete = { pendingDeleteId = goal.id },
+                    onDelete = {
+                        pendingDeleteId = goal.id
+                        pendingDeleteTitle = goal.title
+                    },
                 )
             }
         }
     }
 
-    val doomed = pendingDeleteId?.let { id -> state.goals.firstOrNull { it.id == id } }
+    val doomed = pendingDeleteId
     if (doomed != null) {
         NeoDialog(
             title = stringResource(R.string.dialog_delete_title),
-            message = stringResource(R.string.dialog_delete_goal_message, doomed.title),
+            message = stringResource(R.string.dialog_delete_goal_message, pendingDeleteTitle),
             confirmText = stringResource(R.string.action_delete),
             dismissText = stringResource(R.string.action_cancel),
             destructive = true,
             onConfirm = {
                 pendingDeleteId = null
-                onDelete(doomed.id)
+                onDelete(doomed)
             },
             onDismissRequest = { pendingDeleteId = null },
         )

@@ -112,10 +112,12 @@ internal fun TodayContent(
     // question. Held here rather than in the row: the row is inside a LazyColumn and
     // is disposed the moment the list scrolls, which would close the dialog.
     //
-    // Saved rather than remembered, and by id rather than by value: a rotation used
-    // to dismiss the question mid-decision, and the goal it refers to is not itself
-    // something that survives a process death — it is re-read from state below.
+    // Both halves are saved, and the title is carried rather than looked up. Keeping
+    // only the id meant the dialog could not draw until the list had loaded, so on the
+    // frames right after a rotation there was nothing to show and the question
+    // vanished. Nothing here now waits on data.
     var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingDeleteTitle by rememberSaveable { mutableStateOf("") }
     val reorderState = rememberReorderState(
         listState = listState,
         onMove = onMove,
@@ -227,7 +229,10 @@ internal fun TodayContent(
                         reorderState = reorderState,
                         onToggle = onToggle,
                         onOpenGoal = onOpenGoal,
-                        onRequestDelete = { status -> pendingDeleteId = status.goal.id },
+                        onRequestDelete = { status ->
+                            pendingDeleteId = status.goal.id
+                            pendingDeleteTitle = status.goal.title
+                        },
                         onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                         onReorder = { dragged, target ->
                             if (onMove(dragged, target)) onCommitOrder()
@@ -250,23 +255,17 @@ internal fun TodayContent(
         }
     }
 
-    // Resolves to null if the goal disappeared while the dialog was up, which closes
-    // the dialog rather than leaving it asking about something that no longer exists.
-    val doomed = pendingDeleteId?.let { id ->
-        state.sections.firstNotNullOfOrNull { section ->
-            section.goals.firstOrNull { it.goal.id == id }
-        }
-    }
+    val doomed = pendingDeleteId
     if (doomed != null) {
         NeoDialog(
             title = stringResource(R.string.dialog_delete_title),
-            message = stringResource(R.string.dialog_delete_goal_message, doomed.goal.title),
+            message = stringResource(R.string.dialog_delete_goal_message, pendingDeleteTitle),
             confirmText = stringResource(R.string.action_delete),
             dismissText = stringResource(R.string.action_cancel),
             destructive = true,
             onConfirm = {
                 pendingDeleteId = null
-                onDelete(doomed.goal.id)
+                onDelete(doomed)
             },
             onDismissRequest = { pendingDeleteId = null },
         )
