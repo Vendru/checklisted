@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
@@ -24,11 +25,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,18 +46,19 @@ import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoChip
+import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.theme.NeoTheme
 import java.time.LocalTime
 
-private val REMINDER_TIMES = listOf(
-    LocalTime.of(8, 0),
-    LocalTime.of(12, 0),
-    LocalTime.of(18, 0),
-    LocalTime.of(20, 0),
-    LocalTime.of(22, 0),
-)
+/** Five minutes is fine enough for a daily nudge and keeps the grid scannable. */
+private const val MINUTE_STEP = 5
+
+/** Title, buttons, padding and the dialog's own margins, around whatever it wraps. */
+private val DialogChromeHeight = 240.dp
+
+private fun LocalTime.formatted(): String = "%02d:%02d".format(hour, minute)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -94,6 +98,7 @@ fun SettingsScreen(
             }
         },
         onReminderTimeChange = viewModel::setReminderTime,
+        nextReminder = state.nextReminder,
         onOpenArchived = onOpenArchived,
         modifier = modifier,
     )
@@ -111,8 +116,10 @@ internal fun SettingsContent(
     onReminderTimeChange: (LocalTime) -> Unit,
     onOpenArchived: () -> Unit,
     modifier: Modifier = Modifier,
+    nextReminder: NextReminder? = null,
 ) {
     val colors = NeoTheme.colors
+    var picking by rememberSaveable { mutableStateOf(false) }
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -202,22 +209,45 @@ internal fun SettingsContent(
             }
 
             if (settings.reminderEnabled) {
-                Text(
-                    text = stringResource(R.string.settings_reminder_time),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.ink,
-                )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    REMINDER_TIMES.forEach { time ->
-                        NeoChip(
-                            label = "%02d:%02d".format(time.hour, time.minute),
-                            selected = settings.reminderTime == time,
-                            onClick = { onReminderTimeChange(time) },
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.settings_reminder_time),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colors.inkSoft,
+                        )
+                        Text(
+                            text = settings.reminderTime.formatted(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = colors.ink,
                         )
                     }
+                    NeoOutlineButton(
+                        text = stringResource(R.string.settings_reminder_change),
+                        onClick = { picking = true },
+                    )
+                }
+
+                // Saying when it next goes off is the only feedback that the schedule
+                // was actually booked — otherwise a reminder that silently failed to
+                // register looks exactly like one that is working.
+                if (nextReminder != null) {
+                    Text(
+                        text = stringResource(
+                            if (nextReminder.isToday) {
+                                R.string.settings_reminder_next_today
+                            } else {
+                                R.string.settings_reminder_next_tomorrow
+                            },
+                            nextReminder.time.formatted(),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.inkSoft,
+                    )
                 }
             }
         }
@@ -231,6 +261,117 @@ internal fun SettingsContent(
                 onClick = onOpenArchived,
                 modifier = Modifier.fillMaxWidth(),
             )
+        }
+    }
+
+    if (picking) {
+        ReminderTimeDialog(
+            initial = settings.reminderTime,
+            onPick = {
+                picking = false
+                onReminderTimeChange(it)
+            },
+            onDismiss = { picking = false },
+        )
+    }
+}
+
+/**
+ * Any time of day, in two taps.
+ *
+ * A grid rather than a wheel or a stepper: every option is visible, it is built from
+ * the same chips the rest of this screen uses, and stepping an hour at a time would
+ * have meant eleven taps to get from an evening reminder to a morning one. The five
+ * fixed presets it replaces left anyone who wakes at six or sleeps at midnight with
+ * no reminder they would actually hear.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ReminderTimeDialog(
+    initial: LocalTime,
+    onPick: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var hour by rememberSaveable { mutableIntStateOf(initial.hour) }
+    var minute by rememberSaveable { mutableIntStateOf(initial.minute - initial.minute % MINUTE_STEP) }
+
+    NeoDialog(
+        // The title is the running selection, so the thing being chosen is never off
+        // screen behind the grid.
+        title = LocalTime.of(hour, minute).formatted(),
+        confirmText = stringResource(R.string.action_save),
+        dismissText = stringResource(R.string.action_cancel),
+        onConfirm = { onPick(LocalTime.of(hour, minute)) },
+        onDismissRequest = onDismiss,
+    ) {
+        ReminderTimeGrid(
+            hour = hour,
+            minute = minute,
+            onHour = { hour = it },
+            onMinute = { minute = it },
+        )
+    }
+}
+
+/** The grid itself, separated so a screenshot can render it without a dialog window. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun ReminderTimeGrid(
+    hour: Int,
+    minute: Int,
+    onHour: (Int) -> Unit,
+    onMinute: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Measured off the screen rather than fixed: a cap tall enough to show both grids
+    // in portrait is taller than a landscape screen, and one short enough for
+    // landscape cut the minutes in half exactly where the row of them begins.
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val maxHeight = (screenHeight - DialogChromeHeight).coerceIn(160.dp, 440.dp)
+
+    Column(
+        modifier = modifier
+            .heightIn(max = maxHeight)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.reminder_picker_hour),
+            style = MaterialTheme.typography.labelMedium,
+            color = NeoTheme.colors.inkSoft,
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            (0..23).forEach { option ->
+                NeoChip(
+                    label = "%02d".format(option),
+                    selected = hour == option,
+                    onClick = { onHour(option) },
+                    compact = true,
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.reminder_picker_minute),
+            style = MaterialTheme.typography.labelMedium,
+            color = NeoTheme.colors.inkSoft,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            (0..59 step MINUTE_STEP).forEach { option ->
+                NeoChip(
+                    label = "%02d".format(option),
+                    selected = minute == option,
+                    onClick = { onMinute(option) },
+                    compact = true,
+                )
+            }
         }
     }
 }

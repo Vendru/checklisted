@@ -4,6 +4,7 @@ import com.checklisted.app.domain.model.ThemeMode
 import com.checklisted.app.domain.model.WeekStart
 import com.checklisted.app.ui.FakeReminderPlanner
 import com.checklisted.app.ui.FakeSettingsRepository
+import com.checklisted.app.ui.FakeZoneProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -13,10 +14,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalTime
+import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -24,7 +30,15 @@ class SettingsViewModelTest {
     private val settingsRepository = FakeSettingsRepository()
     private val reminderPlanner = FakeReminderPlanner()
 
-    private fun viewModel() = SettingsViewModel(settingsRepository, reminderPlanner)
+    /** A Sunday at 12:00 UTC, so 20:00 is still ahead and 08:00 is behind. */
+    private val clock: Clock = Clock.fixed(Instant.parse("2026-08-16T12:00:00Z"), ZoneId.of("UTC"))
+
+    private fun viewModel() = SettingsViewModel(
+        settingsRepository = settingsRepository,
+        reminderPlanner = reminderPlanner,
+        zoneProvider = FakeZoneProvider(),
+        clock = clock,
+    )
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
@@ -135,5 +149,26 @@ class SettingsViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(false to LocalTime.of(8, 0), reminderPlanner.last)
+    }
+
+    @Test
+    fun `the next firing is reported, and only while the reminder is on`() = runTest(dispatcher) {
+        assertNull(viewModel().uiState.first { !it.isLoading }.nextReminder)
+
+        val viewModel = viewModel()
+        viewModel.setReminderEnabled(true)
+        testScheduler.advanceUntilIdle()
+
+        // Default 20:00, and it is midday: still ahead, so today.
+        val tonight = viewModel.uiState.first { it.nextReminder != null }.nextReminder!!
+        assertEquals(LocalTime.of(20, 0), tonight.time)
+        assertTrue(tonight.isToday)
+
+        viewModel.setReminderTime(LocalTime.of(8, 0))
+        testScheduler.advanceUntilIdle()
+
+        // 08:00 has already gone by, so the next one is tomorrow's.
+        val morning = viewModel.uiState.first { it.nextReminder?.time == LocalTime.of(8, 0) }.nextReminder!!
+        assertFalse(morning.isToday)
     }
 }

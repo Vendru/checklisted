@@ -29,6 +29,7 @@ import com.checklisted.app.ui.history.DayGoal
 import com.checklisted.app.ui.history.DayGoalList
 import com.checklisted.app.ui.history.HistoryContent
 import com.checklisted.app.ui.history.HistoryUiState
+import com.checklisted.app.ui.settings.ReminderTimeGrid
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.today.TodayContent
 import com.checklisted.app.ui.today.TodaySection
@@ -257,6 +258,27 @@ class FullScreenScreenshotTest {
         paparazzi.unsafeUpdateConfig(landscapeConfig)
         paparazzi.snapshot(name = "tela-hoje-paisagem") {
             NeoTheme(darkTheme = false) { todayState() }
+        }
+    }
+
+    /** The time picker: every hour and every fifth minute, two taps to any of them. */
+    @Test
+    fun reminderPicker() = bothThemes("seletor-de-horario") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NeoTheme.colors.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            NeoDialogContent(
+                title = "07:30",
+                width = 363.dp,
+                confirmText = stringResource(R.string.action_save),
+                dismissText = stringResource(R.string.action_cancel),
+                onConfirm = {},
+            ) {
+                ReminderTimeGrid(hour = 7, minute = 30, onHour = {}, onMinute = {})
+            }
         }
     }
 

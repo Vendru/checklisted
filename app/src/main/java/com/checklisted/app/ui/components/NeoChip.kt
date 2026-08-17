@@ -36,6 +36,7 @@ fun NeoChip(
     modifier: Modifier = Modifier,
     accent: NeoAccent? = null,
     enabled: Boolean = true,
+    compact: Boolean = false,
 ) {
     val colors = NeoTheme.colors
     val interactionSource = rememberNeoInteractionSource()
@@ -57,7 +58,10 @@ fun NeoChip(
                 onClick = onClick,
             )
             .defaultMinSize(minHeight = NeoTokens.MinTouchTarget)
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            // Compact trims the sides only, never the height: a chip in a grid of
+            // twenty-four has to be narrow to fit, and shrinking the touch target to
+            // buy that would be paying for the layout with the finger.
+            .padding(horizontal = if (compact) 8.dp else 16.dp, vertical = 9.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

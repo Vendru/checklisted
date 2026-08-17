@@ -34,6 +34,7 @@ import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.NeoStatRow
 import com.checklisted.app.ui.components.rememberNeoSwipeState
+import com.checklisted.app.ui.settings.NextReminder
 import com.checklisted.app.ui.settings.SettingsContent
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.today.GoalRow
@@ -256,6 +257,7 @@ class AppSurfacesScreenshotTest {
             onReminderToggle = {},
             onOpenArchived = {},
             onReminderTimeChange = {},
+            nextReminder = NextReminder(time = LocalTime.of(8, 0), isToday = false),
         )
     }
 

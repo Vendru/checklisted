@@ -21,18 +21,27 @@ object ReminderSchedule {
      * that does not exist locally is pushed to the next valid instant rather than
      * silently landing an hour off.
      */
-    fun delayUntilNext(now: Instant, zone: ZoneId, time: LocalTime): Duration {
+    fun delayUntilNext(now: Instant, zone: ZoneId, time: LocalTime): Duration =
+        Duration.between(now, nextOccurrence(now, zone, time).toInstant())
+
+    /**
+     * The next moment [time] comes round in [zone].
+     *
+     * Shared with the settings screen, which tells the user when the reminder will
+     * next go off. Two answers to "when does it fire" computed separately would drift,
+     * and the screen saying one thing while the worker did another is worse than not
+     * saying anything.
+     */
+    fun nextOccurrence(now: Instant, zone: ZoneId, time: LocalTime): ZonedDateTime {
         val local = now.atZone(zone)
         val todayAt = local.toLocalDate().atTime(time).atZone(zone)
 
-        // `!isAfter` rather than `isBefore`: firing again at the exact same instant
+        // `isAfter` rather than `!isBefore`: firing again at the exact same instant
         // would schedule a zero delay and run twice.
-        val next = if (todayAt.toInstant().isAfter(now)) {
+        return if (todayAt.toInstant().isAfter(now)) {
             todayAt
         } else {
             local.toLocalDate().plusDays(1).atTime(time).atZone(zone)
         }
-
-        return Duration.between(now, next.toInstant())
     }
 }
