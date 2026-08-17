@@ -1,7 +1,9 @@
 package com.checklisted.app.ui.goal
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +27,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,14 +39,21 @@ import com.checklisted.app.R
 import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoButton
-import com.checklisted.app.ui.components.NeoCheckbox
+import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoChip
+import com.checklisted.app.ui.components.NeoDangerButton
 import com.checklisted.app.ui.components.NeoDialog
+import com.checklisted.app.ui.components.NeoIconCheck
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoTextField
+import com.checklisted.app.ui.components.neoSelectable
+import com.checklisted.app.ui.components.neoSurface
 import com.checklisted.app.ui.components.readableWidth
+import com.checklisted.app.ui.components.rememberNeoInteractionSource
 import com.checklisted.app.ui.theme.NeoAccent
+import com.checklisted.app.ui.theme.NeoCombCell
 import com.checklisted.app.ui.theme.NeoTheme
+import com.checklisted.app.ui.theme.NeoTokens
 
 @Composable
 fun GoalEditorScreen(
@@ -68,8 +81,9 @@ fun GoalEditorScreen(
     )
 }
 
+/** The screen without its view model, so a screenshot can render it. */
 @Composable
-private fun GoalEditorContent(
+internal fun GoalEditorContent(
     state: GoalEditorUiState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
@@ -142,6 +156,13 @@ private fun GoalEditorContent(
             }
         }
 
+        if (state.recurrenceHidesHistory && state.savedRecurrence != null) {
+            RecurrenceWarning(
+                completionCount = state.completionCount,
+                savedRecurrence = state.savedRecurrence,
+            )
+        }
+
         FieldLabel(text = stringResource(R.string.field_color))
         AccentPicker(selected = state.accent, onSelect = onAccentChange)
 
@@ -160,7 +181,9 @@ private fun GoalEditorContent(
                 onClick = onArchive,
                 modifier = Modifier.fillMaxWidth(),
             )
-            NeoButton(
+            // Crimson, like the confirmation it opens and like the swipe drawer on the
+            // Today list. It was honey — the same fill as Save, directly under it.
+            NeoDangerButton(
                 text = stringResource(R.string.action_delete),
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -184,6 +207,42 @@ private fun GoalEditorContent(
     }
 }
 
+/**
+ * What changing the recurrence of a goal with history actually does.
+ *
+ * Wax rather than crimson: the change is reversible and reversing it restores
+ * everything, so this is a heads-up and not a destructive confirmation. Naming the
+ * number of marks and the way back is the part that matters — the alarming version of
+ * this moment is opening the goal afterwards and finding a blank comb with no
+ * explanation anywhere.
+ */
+@Composable
+private fun RecurrenceWarning(completionCount: Int, savedRecurrence: Recurrence) {
+    val colors = NeoTheme.colors
+
+    NeoCard(
+        modifier = Modifier.fillMaxWidth(),
+        color = colors.surfaceMuted,
+    ) {
+        Text(
+            text = stringResource(R.string.editor_recurrence_warning_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.ink,
+        )
+        Text(
+            text = pluralStringResource(
+                R.plurals.editor_recurrence_warning,
+                completionCount,
+                completionCount,
+                stringResource(savedRecurrence.labelRes()),
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.ink,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+}
+
 @Composable
 private fun FieldLabel(text: String) {
     Text(
@@ -193,17 +252,44 @@ private fun FieldLabel(text: String) {
     )
 }
 
-/** Colour tag picker. Each swatch is a filled checkbox, so selection reads at a glance. */
+/**
+ * Colour tag picker: five comb cells, each wearing its own colour.
+ *
+ * Built on checkboxes before, which fill with the tag colour only while checked — so
+ * four of the five swatches were blank white and the one thing a colour picker has to
+ * show, the colours, was the one thing it did not. The tick is ink on every one of
+ * them, which clears 3:1 on all five; white did not, on yellow or teal.
+ */
 @Composable
 private fun AccentPicker(selected: NeoAccent, onSelect: (NeoAccent) -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    val colors = NeoTheme.colors
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         NeoAccent.entries.forEach { accent ->
-            NeoCheckbox(
-                checked = accent == selected,
-                onCheckedChange = { onSelect(accent) },
-                accent = accent,
-                contentDescription = stringResource(accent.labelRes()),
-            )
+            val interactionSource = rememberNeoInteractionSource()
+            val pressed by interactionSource.collectIsPressedAsState()
+            val isSelected = accent == selected
+            val label = stringResource(accent.labelRes())
+
+            Box(
+                modifier = Modifier
+                    .neoSurface(
+                        color = accent.color,
+                        shape = NeoCombCell,
+                        pressed = pressed,
+                    )
+                    .neoSelectable(
+                        selected = isSelected,
+                        interactionSource = interactionSource,
+                    ) { onSelect(accent) }
+                    .size(NeoTokens.MinTouchTarget)
+                    .semantics { contentDescription = label },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (isSelected) {
+                    NeoIconCheck(tint = colors.onAction, size = 20.dp)
+                }
+            }
         }
     }
 }

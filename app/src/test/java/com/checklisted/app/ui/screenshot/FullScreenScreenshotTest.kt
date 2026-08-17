@@ -25,6 +25,8 @@ import com.checklisted.app.ui.archive.ArchivedGoalsUiState
 import com.checklisted.app.ui.components.NeoDialogContent
 import com.checklisted.app.ui.goal.GoalDetailContent
 import com.checklisted.app.ui.goal.GoalDetailUiState
+import com.checklisted.app.ui.goal.GoalEditorContent
+import com.checklisted.app.ui.goal.GoalEditorUiState
 import com.checklisted.app.ui.history.DayGoal
 import com.checklisted.app.ui.history.DayGoalList
 import com.checklisted.app.ui.history.HistoryContent
@@ -271,6 +273,35 @@ class FullScreenScreenshotTest {
         paparazzi.snapshot(name = "tela-hoje-paisagem") {
             NeoTheme(darkTheme = false) { todayState() }
         }
+    }
+
+    /**
+     * The editor warning a goal with history away from a recurrence change.
+     *
+     * Nothing else covers this screen, and this block is the only thing standing
+     * between the user and months of history apparently evaporating.
+     */
+    @Test
+    fun editorRecurrenceWarning() = bothThemes("editor-troca-recorrencia") {
+        GoalEditorContent(
+            state = GoalEditorUiState(
+                goalId = "d",
+                title = "Correr 5 km",
+                description = "Três vezes por semana, sem negociar com o sono.",
+                recurrence = Recurrence.MONTHLY,
+                savedRecurrence = Recurrence.WEEKLY,
+                completionCount = 23,
+                isLoading = false,
+            ),
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onRecurrenceChange = {},
+            onAccentChange = {},
+            onSave = {},
+            onArchive = {},
+            onDelete = {},
+            onBack = {},
+        )
     }
 
     /** The time picker: every hour and every fifth minute, two taps to any of them. */

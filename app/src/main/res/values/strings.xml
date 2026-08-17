@@ -48,6 +48,11 @@
     <string name="goal_editor_title_edit">Editar meta</string>
     <string name="field_description_placeholder">Opcional. Um lembrete do porquê.</string>
     <string name="field_recurrence">Recorrência</string>
+    <string name="editor_recurrence_warning_title">O histórico sai de vista</string>
+    <plurals name="editor_recurrence_warning">
+        <item quantity="one">A sequência recomeça do zero e o favo desta meta fica em branco. A %1$d marcação continua guardada e volta se você escolher %2$s de novo.</item>
+        <item quantity="other">A sequência recomeça do zero e o favo desta meta fica em branco. As %1$d marcações continuam guardadas e voltam se você escolher %2$s de novo.</item>
+    </plurals>
     <string name="field_color">Cor</string>
     <string name="action_save">Salvar</string>
     <string name="action_archive">Arquivar</string>
