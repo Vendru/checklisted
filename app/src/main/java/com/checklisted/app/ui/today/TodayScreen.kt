@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -39,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.checklisted.app.R
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.domain.model.Recurrence
+import com.checklisted.app.ui.AppLocale
 import com.checklisted.app.ui.components.NeoButton
 import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoEmptyState
@@ -52,6 +54,7 @@ import com.checklisted.app.ui.components.rememberReorderState
 import com.checklisted.app.ui.components.reorderable
 import com.checklisted.app.ui.theme.NeoTheme
 import kotlinx.coroutines.isActive
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TodayScreen(
@@ -164,11 +167,29 @@ internal fun TodayContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = stringResource(R.string.today_title),
-                        style = MaterialTheme.typography.displaySmall,
-                        color = colors.ink,
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.today_title),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = colors.ink,
+                        )
+                        // The date was computed, carried through the view model and
+                        // thrown away. In an app whose whole logic is "which period is
+                        // this", saying so out loud is worth a line — especially near
+                        // midnight, when the list silently re-keys itself.
+                        val date = state.date
+                        if (date != null) {
+                            Text(
+                                text = remember(date) {
+                                    date.format(
+                                        DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", AppLocale),
+                                    )
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colors.inkSoft,
+                            )
+                        }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NeoOutlineButton(
                             text = stringResource(R.string.action_history),
