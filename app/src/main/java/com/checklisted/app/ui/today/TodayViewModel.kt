@@ -45,6 +45,17 @@ data class TodayUiState(
 ) {
     /** No goals at all, as opposed to goals that merely have nothing done yet. */
     val hasNoGoals: Boolean = !isLoading && sections.all { it.total == 0 }
+
+    /**
+     * Every period that is open right now has been closed.
+     *
+     * Empty sections do not count against it — a section with no goals is not an
+     * unfinished one — and neither does the loading state, or the screen would flash
+     * the reward before it knew there was anything to reward.
+     */
+    val allDone: Boolean = !isLoading &&
+        !hasNoGoals &&
+        sections.all { it.total == 0 || it.completed == it.total }
 }
 
 @HiltViewModel

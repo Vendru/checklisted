@@ -170,12 +170,12 @@ commit e um resumo para você antes de eu seguir.
 Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 138 testes
+- [x] `./gradlew test` passando — 144 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
-- [x] `./gradlew verifyPaparazziDebug` passando — 43 screenshots
+- [x] `./gradlew verifyPaparazziDebug` passando — 47 screenshots
 
 `./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
 

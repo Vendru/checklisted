@@ -131,51 +131,63 @@ class FullScreenScreenshotTest {
     @Test
     fun todayFull() = bothThemes("tela-hoje") { todayState() }
 
+    /** The day closed: the banner and the per-section marks are the whole payoff. */
+    @Test
+    fun todayAllDone() = bothThemes("tela-hoje-completa") { todayState(allDone = true) }
+
     @Composable
-    private fun todayState() {
+    private fun todayState(allDone: Boolean = false) {
         val daily = PeriodKey("2026-08-17").value
+        val sections = listOf(
+            TodaySection(
+                recurrence = Recurrence.DAILY,
+                periodKey = PeriodKey(daily),
+                goals = listOf(
+                    status(goal("a", "Beber 2L de água", Recurrence.DAILY, "TEAL"), daily, true),
+                    status(
+                        goal(
+                            id = "b",
+                            title = "Ler 20 páginas",
+                            recurrence = Recurrence.DAILY,
+                            tag = "PINK",
+                            description = "Antes de dormir, sem tela.",
+                        ),
+                        daily,
+                        false,
+                    ),
+                    status(goal("c", "Alongar 10 min", Recurrence.DAILY, "YELLOW"), daily, true),
+                ),
+            ),
+            TodaySection(
+                recurrence = Recurrence.WEEKLY,
+                periodKey = PeriodKey("2026-W34"),
+                goals = listOf(
+                    status(goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"), "2026-W34", false),
+                    status(goal("e", "Ligar para a mãe", Recurrence.WEEKLY, "ORANGE"), "2026-W34", true),
+                ),
+            ),
+            TodaySection(
+                recurrence = Recurrence.MONTHLY,
+                periodKey = PeriodKey("2026-08"),
+                goals = listOf(
+                    status(goal("f", "Revisar as finanças", Recurrence.MONTHLY, "TEAL"), "2026-08", false),
+                ),
+            ),
+        )
+
         TodayContent(
             state = TodayUiState(
                 date = today,
                 isLoading = false,
                 // Below, at and well past the point where the badge appears.
                 streaks = mapOf("a" to 12, "b" to 1, "c" to 2, "e" to 143),
-                sections = listOf(
-                    TodaySection(
-                        recurrence = Recurrence.DAILY,
-                        periodKey = PeriodKey(daily),
-                        goals = listOf(
-                            status(goal("a", "Beber 2L de água", Recurrence.DAILY, "TEAL"), daily, true),
-                            status(
-                                goal(
-                                    id = "b",
-                                    title = "Ler 20 páginas",
-                                    recurrence = Recurrence.DAILY,
-                                    tag = "PINK",
-                                    description = "Antes de dormir, sem tela.",
-                                ),
-                                daily,
-                                false,
-                            ),
-                            status(goal("c", "Alongar 10 min", Recurrence.DAILY, "YELLOW"), daily, true),
-                        ),
-                    ),
-                    TodaySection(
-                        recurrence = Recurrence.WEEKLY,
-                        periodKey = PeriodKey("2026-W34"),
-                        goals = listOf(
-                            status(goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"), "2026-W34", false),
-                            status(goal("e", "Ligar para a mãe", Recurrence.WEEKLY, "ORANGE"), "2026-W34", true),
-                        ),
-                    ),
-                    TodaySection(
-                        recurrence = Recurrence.MONTHLY,
-                        periodKey = PeriodKey("2026-08"),
-                        goals = listOf(
-                            status(goal("f", "Revisar as finanças", Recurrence.MONTHLY, "TEAL"), "2026-08", false),
-                        ),
-                    ),
-                ),
+                sections = if (allDone) {
+                    sections.map { section ->
+                        section.copy(goals = section.goals.map { it.copy(isCompleted = true) })
+                    }
+                } else {
+                    sections
+                },
             ),
             onToggle = {},
             onOpenGoal = {},

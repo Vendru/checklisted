@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -42,18 +43,23 @@ import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.ui.AppLocale
 import com.checklisted.app.ui.components.NeoButton
+import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoIconButton
+import com.checklisted.app.ui.components.NeoIconCheck
 import com.checklisted.app.ui.components.NeoIconPlus
 import com.checklisted.app.ui.components.NeoIconSettings
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.ReorderState
+import com.checklisted.app.ui.components.neoSurface
 import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.components.rememberReorderState
 import com.checklisted.app.ui.components.reorderable
+import com.checklisted.app.ui.theme.NeoCombCell
 import com.checklisted.app.ui.theme.NeoTheme
+import com.checklisted.app.ui.theme.NeoTokens
 import kotlinx.coroutines.isActive
 import java.time.format.DateTimeFormatter
 
@@ -216,6 +222,12 @@ internal fun TodayContent(
                 }
             }
 
+            if (state.allDone) {
+                item(key = DONE_KEY) {
+                    HiveFullBanner()
+                }
+            }
+
             if (state.hasNoGoals) {
                 item(key = EMPTY_KEY) {
                     NeoEmptyState(
@@ -334,11 +346,34 @@ private fun SectionHeader(section: TodaySection) {
                 style = MaterialTheme.typography.headlineSmall,
                 color = colors.ink,
             )
-            Text(
-                text = stringResource(R.string.section_counter, section.completed, section.total),
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.ink,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.section_counter, section.completed, section.total),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.ink,
+                )
+                // Local feedback where the last tick happened. The banner up top
+                // summarises the day, but on a long list the top is a scroll away and
+                // the moment would be missed by exactly the people with most to do.
+                if (section.total > 0 && section.completed == section.total) {
+                    Box(
+                        modifier = Modifier
+                            .neoSurface(
+                                color = colors.action,
+                                shape = NeoCombCell,
+                                shadowOffset = 0.dp,
+                                borderWidth = NeoTokens.HairlineBorder,
+                            )
+                            .size(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        NeoIconCheck(tint = colors.onAction, size = 13.dp)
+                    }
+                }
+            }
         }
         NeoProgressBar(progress = section.progress)
     }
@@ -368,6 +403,59 @@ private fun Recurrence.labelRes() = when (this) {
     Recurrence.MONTHLY -> R.string.recurrence_monthly
 }
 
+/**
+ * The day's payoff.
+ *
+ * Shown as a state rather than fired as a one-shot animation, for two reasons. A
+ * celebration that only plays at the instant of the last tick is gone after a rotation
+ * and is never seen by someone who closes the app and comes back — the reward should
+ * still be there when they return. And an entry animation cannot be screenshotted
+ * here: Paparazzi renders composables at a single frame with no way to advance the
+ * animation clock, so it would be the one visual in this app that nothing has looked
+ * at, which is how every appearance defect so far got in.
+ */
+@Composable
+private fun HiveFullBanner() {
+    val colors = NeoTheme.colors
+
+    NeoCard(
+        modifier = Modifier.fillMaxWidth(),
+        color = colors.action,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .neoSurface(
+                        color = colors.onAction,
+                        shape = NeoCombCell,
+                        shadowOffset = 0.dp,
+                        borderColor = colors.onAction,
+                        borderWidth = NeoTokens.HairlineBorder,
+                    )
+                    .size(40.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                NeoIconCheck(tint = colors.action, size = 22.dp)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = stringResource(R.string.today_all_done_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = colors.onAction,
+                )
+                Text(
+                    text = stringResource(R.string.today_all_done_message),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onAction,
+                )
+            }
+        }
+    }
+}
+
 /** Between two goals in the same section. */
 private val RowGap = 10.dp
 
@@ -378,4 +466,5 @@ private val SectionGap = 14.dp
 private val FabGutter = 60.dp
 
 private const val HEADER_KEY = "today-header"
+private const val DONE_KEY = "today-done"
 private const val EMPTY_KEY = "today-empty"

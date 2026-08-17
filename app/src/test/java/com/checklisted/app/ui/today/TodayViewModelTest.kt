@@ -167,6 +167,36 @@ class TodayViewModelTest {
         assertFalse(viewModel().uiState.first { !it.isLoading }.hasNoGoals)
     }
 
+    @Test
+    fun `the day only counts as done when every open period is closed`() = runTest(dispatcher) {
+        goals.value = listOf(goal("a", Recurrence.DAILY, 0), goal("b", Recurrence.WEEKLY, 1))
+        val viewModel = viewModel()
+
+        val fresh = viewModel.uiState.first { !it.isLoading }
+        assertFalse(fresh.allDone)
+
+        viewModel.toggle(fresh.sections[0].goals.single())
+        testScheduler.advanceUntilIdle()
+
+        // Daily closed, weekly still open: not done.
+        val half = viewModel.uiState.first { it.sections[0].goals.single().isCompleted }
+        assertFalse(half.allDone)
+
+        viewModel.toggle(half.sections[1].goals.single())
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.first { it.allDone }.allDone)
+    }
+
+    @Test
+    fun `an empty list is not a finished day`() = runTest(dispatcher) {
+        // No goals at all reports the empty state, never the reward.
+        val state = viewModel().uiState.first { !it.isLoading }
+
+        assertTrue(state.hasNoGoals)
+        assertFalse(state.allDone)
+    }
+
     // region reordering
 
     @Test

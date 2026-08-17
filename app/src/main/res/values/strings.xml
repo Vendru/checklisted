@@ -38,6 +38,8 @@
         <item quantity="one">Sequência de %1$d período</item>
         <item quantity="other">Sequência de %1$d períodos</item>
     </plurals>
+    <string name="today_all_done_title">Favo cheio</string>
+    <string name="today_all_done_message">Nada mais para hoje. Pode fechar o app sem culpa.</string>
     <string name="empty_today_title">Colmeia vazia</string>
     <string name="empty_today_message">Nenhuma meta ainda, o que é bem menos culpa do que parece. Crie a primeira e comece a encher o favo.</string>
 
