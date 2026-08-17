@@ -35,6 +35,7 @@ import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoOutlineButton
+import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.theme.NeoTheme
 
 @Composable
@@ -75,6 +76,7 @@ internal fun ArchivedGoalsContent(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
+            .readableWidth()
             .verticalScroll(rememberScrollState())
             .padding(insets),
         verticalArrangement = Arrangement.spacedBy(10.dp),

@@ -38,6 +38,7 @@ import com.checklisted.app.ui.components.NeoChip
 import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoTextField
+import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
 
@@ -91,6 +92,7 @@ private fun GoalEditorContent(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
+            .readableWidth()
             .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(insets),

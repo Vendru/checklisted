@@ -50,6 +50,7 @@ import com.checklisted.app.ui.components.NeoIconSettings
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.ReorderState
+import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.components.rememberReorderState
 import com.checklisted.app.ui.components.reorderable
 import com.checklisted.app.ui.theme.NeoTheme
@@ -150,7 +151,10 @@ internal fun TodayContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.background),
+            .background(colors.background)
+            // List and floating button share the cap, so on a wide screen the button
+            // stays against the column it belongs to instead of the far edge.
+            .readableWidth(),
     ) {
         // Spacing is per item, not per section: a list arrangement of 20.dp applied
         // between every row too, so consecutive goals sat 30.dp apart and three goals

@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import com.android.resources.ScreenOrientation
 import com.checklisted.app.R
 import com.checklisted.app.domain.history.HeatmapDay
 import com.checklisted.app.domain.model.Goal
@@ -59,6 +60,16 @@ class FullScreenScreenshotTest {
         // a mix no real user sees.
         deviceConfig = DeviceConfig.PIXEL_6.copy(locale = "pt-rBR"),
         showSystemUi = false,
+    )
+
+    // Paparazzi ships no landscape Pixel, so it is the same device turned over. It
+    // has to be swapped into the one rule rather than added as a second: two render
+    // sessions in one class fight over layoutlib and every test in the class dies.
+    private val landscapeConfig = DeviceConfig.PIXEL_6.copy(
+        locale = "pt-rBR",
+        screenWidth = DeviceConfig.PIXEL_6.screenHeight,
+        screenHeight = DeviceConfig.PIXEL_6.screenWidth,
+        orientation = ScreenOrientation.LANDSCAPE,
     )
 
     /** A Monday: the first day of a week, so the trailing column is at its shortest. */
@@ -115,7 +126,10 @@ class FullScreenScreenshotTest {
     }
 
     @Test
-    fun todayFull() = bothThemes("tela-hoje") {
+    fun todayFull() = bothThemes("tela-hoje") { todayState() }
+
+    @Composable
+    private fun todayState() {
         val daily = PeriodKey("2026-08-17").value
         TodayContent(
             state = TodayUiState(
@@ -210,6 +224,21 @@ class FullScreenScreenshotTest {
             onToggle = {},
             onDismissDay = {},
         )
+    }
+
+    /**
+     * The one wide-screen render.
+     *
+     * Everything else here is a 411.dp portrait phone, which is exactly the shape that
+     * hides a line-length problem. Landscape is 914.dp across and is what proves the
+     * reading column is capped.
+     */
+    @Test
+    fun todayLandscape() {
+        paparazzi.unsafeUpdateConfig(landscapeConfig)
+        paparazzi.snapshot(name = "tela-hoje-paisagem") {
+            NeoTheme(darkTheme = false) { todayState() }
+        }
     }
 
     /** The way back out of the archive, which for a while did not exist at all. */

@@ -44,6 +44,7 @@ import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoChip
 import com.checklisted.app.ui.components.NeoOutlineButton
+import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.theme.NeoTheme
 import java.time.LocalTime
 
@@ -121,6 +122,7 @@ internal fun SettingsContent(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
+            .readableWidth()
             .verticalScroll(rememberScrollState())
             .padding(insets),
         verticalArrangement = Arrangement.spacedBy(20.dp),

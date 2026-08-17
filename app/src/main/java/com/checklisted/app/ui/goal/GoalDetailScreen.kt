@@ -30,6 +30,7 @@ import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.components.NeoStatRow
+import com.checklisted.app.ui.components.readableWidth
 import com.checklisted.app.ui.theme.NeoTheme
 import java.time.LocalDate
 
@@ -77,6 +78,7 @@ internal fun GoalDetailContent(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
+            .readableWidth()
             .verticalScroll(rememberScrollState())
             .padding(insets),
         verticalArrangement = Arrangement.spacedBy(20.dp),
