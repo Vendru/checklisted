@@ -167,12 +167,12 @@ commit e um resumo para você antes de eu seguir.
 Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 120 testes
+- [x] `./gradlew test` passando — 125 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
-- [x] `./gradlew verifyPaparazziDebug` passando — 20 screenshots
+- [x] `./gradlew verifyPaparazziDebug` passando — 30 screenshots
 
 `./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
 
@@ -189,6 +189,21 @@ Olhar as primeiras renderizações encontrou três defeitos que nenhum teste de
 comportamento pegaria: o estado desativado virava cinza de baixo contraste, a
 ilustração do estado vazio tinha tracinhos fora da trajetória do check, e o tile de
 estatística acentuado ficava com texto bone sobre rosa.
+
+Imagem de componente não bastou. Dois defeitos passaram por ela e só apareceram no
+aparelho — o grid do histórico mais alto que a tela e um chip de horário virado de
+lado. A resposta foi renderizar **telas inteiras, em tamanho de aparelho, sem
+`SHRINK`**, com a quantidade de dados que um app em uso tem
+(`FullScreenScreenshotTest`). Isso achou de imediato mais três: o diálogo pedindo
+428.dp numa tela de 411.dp, o botão flutuante cobrindo a última meta da lista, e o
+grid do histórico sem eixo de tempo nenhum.
+
+Duas armadilhas da ferramenta, documentadas para não serem redescobertas:
+
+- O Paparazzi prende a janela de diálogo numa largura fixa e corta o que passa dela.
+  Um diálogo é renderizado pelo corpo (`NeoDialogContent`), não pela janela.
+- `DeviceConfig.locale` resolve recurso, não `Locale.getDefault()`. Datas e dias da
+  semana saem do `AppLocale` do app, que é o idioma em que a interface está escrita.
 
 Continua **não verificado em dispositivo**: o gesto de arraste (incluindo a rolagem
 automática), o disparo real do WorkManager e a notificação. Screenshot test cobre
