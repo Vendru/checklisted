@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -32,9 +33,8 @@ import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
 import java.time.LocalDate
-import java.time.Month
 import java.time.format.TextStyle
-import java.util.Locale
+import java.time.temporal.ChronoUnit
 
 private const val DAYS_PER_WEEK = 7
 private val LabelWidth = 20.dp
@@ -59,9 +59,9 @@ private fun weekOf(column: Int, weeks: Int): Int = weeks - 1 - column
  * Time runs **right to left**: this week is the first column, and the further right
  * you look the further back you are. A new goal has one marked square and ninety
  * blank ones, and with the usual left-to-right calendar order that one square sat in
- * the far corner with three months of nothing leading up to it. The cost is that the
- * month names read backwards along the top, which is the honest price of putting the
- * present where the eye lands.
+ * the far corner with three months of nothing leading up to it. The axis along the
+ * top counts distance into the past rather than naming months, so it reads forward
+ * while the dates run backward — see [AgeAxis].
  *
  * Intensity is quantised into four solid fills. The ramp is deliberately not the
  * action colour and takes no accent: this grid repeats its colour dozens of times on
@@ -85,7 +85,7 @@ fun NeoHeatmap(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(CellGap),
     ) {
-        MonthAxis(days = days, weeks = weeks, locale = locale)
+        AgeAxis(days = days, weeks = weeks)
 
         repeat(DAYS_PER_WEEK) { weekday ->
             Row(
@@ -126,31 +126,37 @@ fun NeoHeatmap(
 }
 
 /**
- * Names the month over the column where it starts.
+ * Marks how far back each stretch of the grid is.
  *
- * Without it the grid is thirteen anonymous columns: the user can see that a week was
- * good but not which week it was. A month is written once, above its first column,
- * and the columns that continue it are left blank.
+ * Month names were the obvious axis and the wrong one. With the newest week on the
+ * left they came out "ago jul jun mai", counting down as the eye moves right, which
+ * every horizontal axis ever read says should be counting up. Distance into the past
+ * reads the correct way round — it grows rightward exactly as the dates recede — and
+ * it is also the question the grid is asked: not "which month was that" but "how long
+ * ago did I stop".
+ *
+ * The exact date is still a tap away on any square.
  */
 @Composable
-private fun MonthAxis(days: List<HeatmapDay>, weeks: Int, locale: Locale) {
+private fun AgeAxis(days: List<HeatmapDay>, weeks: Int) {
+    val newest = days.last().date
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(CellGap),
         verticalAlignment = Alignment.Bottom,
     ) {
         Spacer(modifier = Modifier.width(LabelWidth))
-        var previousMonth: Month? = null
+        var previousAge: Int? = null
         repeat(weeks) { column ->
-            // Named where the reader meets it, which running backwards means the
-            // month's last week rather than its first.
-            val month = days.getOrNull(weekOf(column, weeks) * DAYS_PER_WEEK)?.date?.month
-            val label = if (month != null && month != previousMonth) {
-                month.getDisplayName(TextStyle.SHORT, locale).take(3)
-            } else {
-                ""
+            val date = days.getOrNull(weekOf(column, weeks) * DAYS_PER_WEEK)?.date
+            val age = date?.let { ChronoUnit.MONTHS.between(it, newest).toInt() }
+            val label = when {
+                age == null || age == previousAge -> ""
+                age == 0 -> stringResource(R.string.heatmap_age_now)
+                else -> pluralStringResource(R.plurals.heatmap_age_months, age, age)
             }
-            if (month != null) previousMonth = month
+            if (age != null) previousAge = age
 
             Text(
                 text = label,

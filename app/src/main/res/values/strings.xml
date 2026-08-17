@@ -71,6 +71,11 @@
     <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
     <string name="heatmap_legend_less">menos</string>
     <string name="heatmap_legend_more">mais</string>
+    <string name="heatmap_age_now">agora</string>
+    <plurals name="heatmap_age_months">
+        <item quantity="one">%d mês</item>
+        <item quantity="other">%d meses</item>
+    </plurals>
 
     <!-- Configurações -->
     <string name="settings_title">Configurações</string>
