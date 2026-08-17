@@ -115,10 +115,6 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    fun archive(goalId: String) {
-        viewModelScope.launch { goalRepository.setArchived(goalId, archived = true) }
-    }
-
     fun delete(goalId: String) {
         viewModelScope.launch { goalRepository.deleteGoal(goalId) }
     }

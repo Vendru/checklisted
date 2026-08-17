@@ -26,6 +26,12 @@ import com.checklisted.app.R
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
+import com.checklisted.app.ui.components.NeoIconCheck
+import com.checklisted.app.ui.components.NeoIconTrash
+import com.checklisted.app.ui.components.NeoSwipeAction
+import com.checklisted.app.ui.components.NeoSwipeRow
+import com.checklisted.app.ui.components.NeoSwipeState
+import com.checklisted.app.ui.components.rememberNeoSwipeState
 import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoTheme
 
@@ -44,18 +50,21 @@ fun GoalRow(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     isDragging: Boolean = false,
+    onDelete: (() -> Unit)? = null,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
+    swipeState: NeoSwipeState = rememberNeoSwipeState(),
 ) {
     val colors = NeoTheme.colors
     val accent = NeoAccent.fromTag(status.goal.colorTag)
 
-    // Dragging is unreachable with a screen reader, so the same reordering is
-    // offered as custom actions. Without these the feature simply does not exist
-    // for those users.
+    // Neither dragging nor swiping exists for a screen reader, so everything they
+    // reach is also offered as a custom action. Without these the features simply do
+    // not exist for those users.
     val moveUpLabel = stringResource(R.string.a11y_move_up)
     val moveDownLabel = stringResource(R.string.a11y_move_down)
-    val moveActions = buildList {
+    val deleteLabel = stringResource(R.string.a11y_delete_goal)
+    val rowActions = buildList {
         onMoveUp?.let {
             add(
                 CustomAccessibilityAction(moveUpLabel) {
@@ -72,12 +81,66 @@ fun GoalRow(
                 },
             )
         }
+        onDelete?.let {
+            add(
+                CustomAccessibilityAction(deleteLabel) {
+                    it()
+                    true
+                },
+            )
+        }
     }
 
+    NeoSwipeRow(
+        modifier = modifier.fillMaxWidth(),
+        state = swipeState,
+        // A row being dragged up the list must not also slide sideways.
+        enabled = !isDragging,
+        startAction = NeoSwipeAction(
+            label = stringResource(
+                if (status.isCompleted) R.string.action_reopen else R.string.action_complete,
+            ),
+            fill = colors.action,
+            contentColor = colors.onAction,
+            onTrigger = onToggle,
+            icon = { tint -> NeoIconCheck(tint = tint, size = 18.dp) },
+        ),
+        endAction = onDelete?.let { delete ->
+            NeoSwipeAction(
+                label = stringResource(R.string.action_delete),
+                fill = colors.danger,
+                contentColor = colors.onDanger,
+                onTrigger = delete,
+                icon = { tint -> NeoIconTrash(tint = tint, size = 18.dp) },
+            )
+        },
+    ) {
+        GoalCard(
+            status = status,
+            accent = accent,
+            isDragging = isDragging,
+            rowActions = rowActions,
+            onToggle = onToggle,
+            onOpen = onOpen,
+        )
+    }
+}
+
+@Composable
+private fun GoalCard(
+    status: GoalStatus,
+    accent: NeoAccent,
+    isDragging: Boolean,
+    rowActions: List<CustomAccessibilityAction>,
+    onToggle: () -> Unit,
+    onOpen: () -> Unit,
+) {
+    val colors = NeoTheme.colors
+
     NeoCard(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .semantics { if (moveActions.isNotEmpty()) customActions = moveActions }
+            .semantics { if (rowActions.isNotEmpty()) customActions = rowActions }
             .graphicsLayer {
                 // Lifts the dragged row off the stack. Scale only — the shadow is a
                 // hard offset and must not grow, or the row would look blurred.

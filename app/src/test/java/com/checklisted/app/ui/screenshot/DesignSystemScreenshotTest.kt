@@ -16,6 +16,7 @@ import com.checklisted.app.ui.components.NeoCardSamples
 import com.checklisted.app.ui.components.NeoCheckboxSamples
 import com.checklisted.app.ui.components.NeoChipSamples
 import com.checklisted.app.ui.components.NeoProgressBarSamples
+import com.checklisted.app.ui.components.NeoSwipeRowSamples
 import com.checklisted.app.ui.components.NeoTextFieldSamples
 import com.checklisted.app.ui.theme.NeoTheme
 import org.junit.Rule
@@ -77,4 +78,8 @@ class DesignSystemScreenshotTest {
 
     @Test
     fun cards() = bothThemes("cards") { NeoCardSamples() }
+
+    /** Both drawers open, which is the only state worth looking at. */
+    @Test
+    fun swipeActions() = bothThemes("gestos") { NeoSwipeRowSamples() }
 }

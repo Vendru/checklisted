@@ -26,6 +26,7 @@ import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoHeatmap
 import com.checklisted.app.ui.components.NeoProgressBar
 import com.checklisted.app.ui.components.NeoStatRow
+import com.checklisted.app.ui.components.rememberNeoSwipeState
 import com.checklisted.app.ui.settings.SettingsContent
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.today.GoalRow
@@ -134,6 +135,44 @@ class AppSurfacesScreenshotTest {
             status = status("Correr 5 km", "PURPLE", completed = false),
             onToggle = {},
             onOpen = {},
+        )
+    }
+
+    /**
+     * The real goal row with each drawer open, at the width it has on the screen.
+     *
+     * The design system's own sample renders a bare card; this is the row that ships,
+     * with its checkbox, description and tag dot sliding over the action underneath.
+     */
+    @Test
+    fun swipedGoalRows() = bothThemes("lista-com-gesto") {
+        GoalRow(
+            status = status("Beber 2L de água", "TEAL", completed = false),
+            onToggle = {},
+            onOpen = {},
+            onDelete = {},
+            swipeState = rememberNeoSwipeState(initialReveal = 150.dp),
+        )
+        GoalRow(
+            status = status(
+                title = "Ler 20 páginas",
+                colorTag = "PINK",
+                completed = false,
+                description = "Antes de dormir, sem tela.",
+            ),
+            onToggle = {},
+            onOpen = {},
+            onDelete = {},
+            swipeState = rememberNeoSwipeState(initialReveal = (-150).dp),
+        )
+        // Short of the commit point: the drawer is neutral, because letting go here
+        // does nothing.
+        GoalRow(
+            status = status("Correr 5 km", "PURPLE", completed = false),
+            onToggle = {},
+            onOpen = {},
+            onDelete = {},
+            swipeState = rememberNeoSwipeState(initialReveal = (-60).dp),
         )
     }
 

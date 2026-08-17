@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +40,7 @@ import com.checklisted.app.R
 import com.checklisted.app.domain.model.GoalStatus
 import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.ui.components.NeoButton
+import com.checklisted.app.ui.components.NeoDialog
 import com.checklisted.app.ui.components.NeoEmptyState
 import com.checklisted.app.ui.components.NeoIconButton
 import com.checklisted.app.ui.components.NeoIconPlus
@@ -69,6 +73,7 @@ fun TodayScreen(
         onCreateGoal = onCreateGoal,
         onOpenHistory = onOpenHistory,
         onOpenSettings = onOpenSettings,
+        onDelete = viewModel::delete,
         onMove = viewModel::moveGoal,
         onCommitOrder = viewModel::commitOrder,
         onCancelReorder = viewModel::cancelReorder,
@@ -89,6 +94,7 @@ internal fun TodayContent(
     onCreateGoal: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
+    onDelete: (String) -> Unit,
     onMove: (String, String) -> Boolean,
     onCommitOrder: () -> Unit,
     onCancelReorder: () -> Unit,
@@ -97,6 +103,11 @@ internal fun TodayContent(
     val colors = NeoTheme.colors
     val haptics = LocalHapticFeedback.current
     val listState = rememberLazyListState()
+
+    // Deleting takes the goal's history with it, so the swipe only ever opens this
+    // question. Held here rather than in the row: the row is inside a LazyColumn and
+    // is disposed the moment the list scrolls, which would close the dialog.
+    var pendingDelete by remember { mutableStateOf<GoalStatus?>(null) }
     val reorderState = rememberReorderState(
         listState = listState,
         onMove = onMove,
@@ -186,6 +197,7 @@ internal fun TodayContent(
                         reorderState = reorderState,
                         onToggle = onToggle,
                         onOpenGoal = onOpenGoal,
+                        onRequestDelete = { status -> pendingDelete = status },
                         onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                         onReorder = { dragged, target ->
                             if (onMove(dragged, target)) onCommitOrder()
@@ -207,6 +219,22 @@ internal fun TodayContent(
             )
         }
     }
+
+    val doomed = pendingDelete
+    if (doomed != null) {
+        NeoDialog(
+            title = stringResource(R.string.dialog_delete_title),
+            message = stringResource(R.string.dialog_delete_goal_message, doomed.goal.title),
+            confirmText = stringResource(R.string.action_delete),
+            dismissText = stringResource(R.string.action_cancel),
+            destructive = true,
+            onConfirm = {
+                pendingDelete = null
+                onDelete(doomed.goal.id)
+            },
+            onDismissRequest = { pendingDelete = null },
+        )
+    }
 }
 
 private fun LazyListScope.todaySection(
@@ -214,6 +242,7 @@ private fun LazyListScope.todaySection(
     reorderState: ReorderState,
     onToggle: (GoalStatus) -> Unit,
     onOpenGoal: (String) -> Unit,
+    onRequestDelete: (GoalStatus) -> Unit,
     onDragStarted: () -> Unit,
     onReorder: (String, String) -> Unit,
 ) {
@@ -242,6 +271,7 @@ private fun LazyListScope.todaySection(
             isDragging = dragging,
             onToggle = { onToggle(status) },
             onOpen = { onOpenGoal(status.goal.id) },
+            onDelete = { onRequestDelete(status) },
             onMoveUp = previousId?.let { target -> { onReorder(status.goal.id, target) } },
             onMoveDown = nextId?.let { target -> { onReorder(status.goal.id, target) } },
             modifier = Modifier

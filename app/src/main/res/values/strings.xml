@@ -5,6 +5,7 @@
     <!-- Ações -->
     <string name="action_new_goal">Nova meta</string>
     <string name="action_complete">Concluir</string>
+    <string name="action_reopen">Reabrir</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_delete">Excluir</string>
     <string name="action_disabled">Desativado</string>
@@ -27,6 +28,7 @@
     <!-- Diálogos -->
     <string name="dialog_delete_title">Excluir meta?</string>
     <string name="dialog_delete_message">Isso apaga o histórico junto. Se você só quer tirar da lista, arquive.</string>
+    <string name="dialog_delete_goal_message">Isso apaga \"%1$s\" e todo o histórico dela. Se você só quer tirar da lista, arquive pelo editor.</string>
 
     <!-- Tela Hoje -->
     <string name="today_title">Hoje</string>
@@ -106,6 +108,7 @@
     <string name="a11y_reorder_hint">Segure e arraste para reordenar</string>
     <string name="a11y_move_up">Mover para cima</string>
     <string name="a11y_move_down">Mover para baixo</string>
+    <string name="a11y_delete_goal">Excluir meta</string>
 
     <!-- Amostras -->
     <string name="sample_goal_title">Beber 2L de água</string>

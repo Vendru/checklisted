@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.checklisted.app.R
-import com.checklisted.app.ui.theme.NeoAccent
 import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 
@@ -41,7 +40,7 @@ fun NeoDialog(
     confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
     dismissText: String? = null,
-    confirmAccent: NeoAccent? = null,
+    destructive: Boolean = false,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     // Turning off the platform width means nothing stops the box from growing past the
@@ -67,7 +66,7 @@ fun NeoDialog(
             onConfirm = onConfirm,
             dismissText = dismissText,
             onDismiss = onDismissRequest,
-            confirmAccent = confirmAccent,
+            destructive = destructive,
             content = content,
         )
     }
@@ -90,7 +89,7 @@ internal fun NeoDialogContent(
     onConfirm: (() -> Unit)? = null,
     dismissText: String? = null,
     onDismiss: () -> Unit = {},
-    confirmAccent: NeoAccent? = null,
+    destructive: Boolean = false,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val colors = NeoTheme.colors
@@ -130,7 +129,11 @@ internal fun NeoDialogContent(
                     NeoOutlineButton(text = dismissText, onClick = onDismiss)
                 }
                 if (confirmText != null && onConfirm != null) {
-                    NeoButton(text = confirmText, onClick = onConfirm, accent = confirmAccent)
+                    if (destructive) {
+                        NeoDangerButton(text = confirmText, onClick = onConfirm)
+                    } else {
+                        NeoButton(text = confirmText, onClick = onConfirm)
+                    }
                 }
             }
         }
@@ -146,6 +149,7 @@ private fun NeoDialogPreview() {
             message = stringResource(R.string.dialog_delete_message),
             confirmText = stringResource(R.string.action_delete),
             dismissText = stringResource(R.string.action_cancel),
+            destructive = true,
             onConfirm = {},
         )
     }

@@ -172,6 +172,7 @@ private fun GoalEditorContent(
             message = stringResource(R.string.dialog_delete_message),
             confirmText = stringResource(R.string.action_delete),
             dismissText = stringResource(R.string.action_cancel),
+            destructive = true,
             onConfirm = {
                 showDeleteDialog = false
                 onDelete()

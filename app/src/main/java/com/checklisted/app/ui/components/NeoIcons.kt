@@ -102,6 +102,60 @@ fun NeoIconSettings(
     }
 }
 
+/** The tick, at icon scale. Same elbow as the one [NeoCheckbox] draws. */
+@Composable
+fun NeoIconCheck(
+    modifier: Modifier = Modifier,
+    tint: Color = NeoTheme.colors.ink,
+    size: Dp = DefaultIconSize,
+) {
+    NeoIcon(modifier, size) {
+        val w = this.size.width
+        val h = this.size.height
+        val tick = Path().apply {
+            moveTo(w * 0.16f, h * 0.52f)
+            lineTo(w * 0.40f, h * 0.78f)
+            lineTo(w * 0.86f, h * 0.22f)
+        }
+        drawPath(
+            path = tick,
+            color = tint,
+            style = Stroke(DefaultStroke.toPx(), cap = StrokeCap.Square, join = StrokeJoin.Miter),
+        )
+    }
+}
+
+/** Bin: lid, handle and body. Straight-sided, because a tapered one loses its shape here. */
+@Composable
+fun NeoIconTrash(
+    modifier: Modifier = Modifier,
+    tint: Color = NeoTheme.colors.ink,
+    size: Dp = DefaultIconSize,
+) {
+    NeoIcon(modifier, size) {
+        val w = this.size.width
+        val h = this.size.height
+        val stroke = DefaultStroke.toPx()
+
+        drawLine(tint, Offset(w * 0.08f, h * 0.26f), Offset(w * 0.92f, h * 0.26f), stroke, StrokeCap.Square)
+        drawLine(tint, Offset(w * 0.38f, h * 0.26f), Offset(w * 0.38f, h * 0.10f), stroke, StrokeCap.Square)
+        drawLine(tint, Offset(w * 0.62f, h * 0.26f), Offset(w * 0.62f, h * 0.10f), stroke, StrokeCap.Square)
+        drawLine(tint, Offset(w * 0.38f, h * 0.10f), Offset(w * 0.62f, h * 0.10f), stroke, StrokeCap.Square)
+
+        val body = Path().apply {
+            moveTo(w * 0.20f, h * 0.26f)
+            lineTo(w * 0.20f, h * 0.92f)
+            lineTo(w * 0.80f, h * 0.92f)
+            lineTo(w * 0.80f, h * 0.26f)
+        }
+        drawPath(
+            path = body,
+            color = tint,
+            style = Stroke(stroke, cap = StrokeCap.Square, join = StrokeJoin.Miter),
+        )
+    }
+}
+
 @Composable
 private fun NeoIcon(modifier: Modifier, size: Dp, draw: DrawScope.() -> Unit) {
     Canvas(modifier = modifier.size(size)) { draw() }
@@ -116,6 +170,8 @@ private fun NeoIconsPreview() {
             NeoIconBack()
             NeoIconDrag()
             NeoIconSettings()
+            NeoIconCheck()
+            NeoIconTrash()
         }
     }
 }

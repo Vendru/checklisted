@@ -46,6 +46,30 @@ fun NeoButton(
     )
 }
 
+/**
+ * The button that destroys something.
+ *
+ * Its own variant rather than a colour passed in, so every irreversible confirmation
+ * in the app is the same crimson and no caller can quietly hand it a friendlier one.
+ */
+@Composable
+fun NeoDangerButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    NeoButtonBody(
+        text = text,
+        onClick = onClick,
+        modifier = modifier,
+        fill = NeoTheme.colors.danger,
+        contentColor = NeoTheme.colors.onDanger,
+        enabled = enabled,
+        leadingIcon = null,
+    )
+}
+
 /** Lower-emphasis variant: same body, neutral fill. */
 @Composable
 fun NeoOutlineButton(

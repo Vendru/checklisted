@@ -161,6 +161,7 @@ class FullScreenScreenshotTest {
             onCreateGoal = {},
             onOpenHistory = {},
             onOpenSettings = {},
+            onDelete = {},
             onMove = { _, _ -> false },
             onCommitOrder = {},
             onCancelReorder = {},
@@ -207,6 +208,35 @@ class FullScreenScreenshotTest {
             onToggle = {},
             onDismissDay = {},
         )
+    }
+
+    /**
+     * The question a left swipe asks.
+     *
+     * The message names the goal, so it is the one dialog whose length depends on user
+     * input — a long title is what would push the buttons off the bottom.
+     */
+    @Test
+    fun deleteConfirmation() = bothThemes("confirmar-exclusao") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NeoTheme.colors.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            NeoDialogContent(
+                title = stringResource(R.string.dialog_delete_title),
+                width = 363.dp,
+                message = stringResource(
+                    R.string.dialog_delete_goal_message,
+                    "Correr 5 km toda terça e quinta de manhã",
+                ),
+                confirmText = stringResource(R.string.action_delete),
+                dismissText = stringResource(R.string.action_cancel),
+                destructive = true,
+                onConfirm = {},
+            )
+        }
     }
 
     /**

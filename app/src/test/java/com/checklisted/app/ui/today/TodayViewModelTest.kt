@@ -267,4 +267,24 @@ class TodayViewModelTest {
 
         assertTrue(completions.value.isEmpty())
     }
+
+    /**
+     * The completions going with it is the schema's job — `onDelete = CASCADE` on the
+     * completion's foreign key — not the view model's, so what is checked here is that
+     * the right goal leaves and the section closes over it.
+     */
+    @Test
+    fun `deleting drops the goal from its section`() = runTest(dispatcher) {
+        goals.value = listOf(goal("a", Recurrence.DAILY, 0), goal("b", Recurrence.DAILY, 1))
+        val viewModel = viewModel()
+        viewModel.uiState.first { !it.isLoading }
+
+        viewModel.delete("a")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf("b"), goals.value.map { it.id })
+
+        val remaining = viewModel.uiState.first { it.sections[0].goals.size == 1 }
+        assertEquals("b", remaining.sections[0].goals.first().goal.id)
+    }
 }

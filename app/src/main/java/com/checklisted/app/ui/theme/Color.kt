@@ -34,6 +34,17 @@ val NeoTerracotta = Color(0xFFB83E1B)
 val NeoEmber = Color(0xFFFF7A4D)
 
 /**
+ * Destruction. Deliberately crimson rather than a redder terracotta.
+ *
+ * The action colour is already a burnt orange-red; a destructive red next to it would
+ * read as a slightly different shade of the same thing. Pushing the hue blue makes
+ * "this deletes something" legible at a glance, at 8.1:1 under white in the light
+ * theme and 5.9:1 under ink in the dark one.
+ */
+val NeoCrimson = Color(0xFF9B1B30)
+val NeoRose = Color(0xFFFF6B7A)
+
+/**
  * The data ramp, deliberately a different hue from the action colour.
  *
  * The heatmap repeats its colour roughly eighty times on one screen. Painting it in
@@ -82,6 +93,8 @@ data class NeoColors(
     val shadow: Color,
     val action: Color,
     val onAction: Color,
+    val danger: Color,
+    val onDanger: Color,
     val dataLow: Color,
     val dataHigh: Color,
     val isDark: Boolean,
@@ -98,6 +111,8 @@ val NeoLightColors = NeoColors(
     shadow = NeoDust,
     action = NeoTerracotta,
     onAction = NeoWhite,
+    danger = NeoCrimson,
+    onDanger = NeoWhite,
     dataLow = NeoSand,
     dataHigh = NeoSlate,
     isDark = false,
@@ -114,6 +129,8 @@ val NeoDarkColors = NeoColors(
     shadow = NeoNightShadow,
     action = NeoEmber,
     onAction = Color(0xFF1A1005),
+    danger = NeoRose,
+    onDanger = Color(0xFF1A1005),
     dataLow = NeoNightTrack,
     dataHigh = NeoSlateLight,
     isDark = true,
