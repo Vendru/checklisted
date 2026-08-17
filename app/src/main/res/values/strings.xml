@@ -122,7 +122,6 @@
     <string name="color_purple">Roxo</string>
 
     <!-- Acessibilidade -->
-    <string name="a11y_reorder_hint">Segure e arraste para reordenar</string>
     <string name="a11y_move_up">Mover para cima</string>
     <string name="a11y_move_down">Mover para baixo</string>
     <string name="a11y_delete_goal">Excluir meta</string>
