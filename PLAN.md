@@ -175,7 +175,7 @@ Estado final:
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
-- [x] `./gradlew verifyPaparazziDebug` passando — 42 screenshots
+- [x] `./gradlew verifyPaparazziDebug` passando — 43 screenshots
 
 `./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
 

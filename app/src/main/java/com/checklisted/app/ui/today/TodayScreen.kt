@@ -173,7 +173,12 @@ internal fun TodayContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column {
+                    // Weighted, so the buttons are measured at their own size first and
+                    // the title yields what is left. Unweighted it was measured first
+                    // and ate the row: at a large system font the date pushed the
+                    // history button into wrapping mid-word and squashed the settings
+                    // icon to a sliver against the edge.
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.today_title),
                             style = MaterialTheme.typography.displaySmall,

@@ -65,6 +65,8 @@ class FullScreenScreenshotTest {
     // Paparazzi ships no landscape Pixel, so it is the same device turned over. It
     // has to be swapped into the one rule rather than added as a second: two render
     // sessions in one class fight over layoutlib and every test in the class dies.
+    private val largeFontConfig = DeviceConfig.PIXEL_6.copy(locale = "pt-rBR", fontScale = 1.3f)
+
     private val landscapeConfig = DeviceConfig.PIXEL_6.copy(
         locale = "pt-rBR",
         screenWidth = DeviceConfig.PIXEL_6.screenHeight,
@@ -226,6 +228,21 @@ class FullScreenScreenshotTest {
             onToggle = {},
             onDismissDay = {},
         )
+    }
+
+    /**
+     * The header at a large system font.
+     *
+     * Every other render here is fontScale 1.0, which is the setting that hides a
+     * header from squashing its own buttons — and a phone set to bigger text is a
+     * setting plenty of people use, not an edge case.
+     */
+    @Test
+    fun todayLargeFont() {
+        paparazzi.unsafeUpdateConfig(largeFontConfig)
+        paparazzi.snapshot(name = "tela-hoje-fonte-grande") {
+            NeoTheme(darkTheme = false) { todayState() }
+        }
     }
 
     /**
