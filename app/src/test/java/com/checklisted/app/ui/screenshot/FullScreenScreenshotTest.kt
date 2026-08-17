@@ -135,6 +135,8 @@ class FullScreenScreenshotTest {
             state = TodayUiState(
                 date = today,
                 isLoading = false,
+                // Below, at and well past the point where the badge appears.
+                streaks = mapOf("a" to 12, "b" to 1, "c" to 2, "e" to 143),
                 sections = listOf(
                     TodaySection(
                         recurrence = Recurrence.DAILY,

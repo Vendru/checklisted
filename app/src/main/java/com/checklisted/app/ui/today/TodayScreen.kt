@@ -223,6 +223,7 @@ internal fun TodayContent(
                 state.sections.forEach { section ->
                     todaySection(
                         section = section,
+                        streaks = state.streaks,
                         reorderState = reorderState,
                         onToggle = onToggle,
                         onOpenGoal = onOpenGoal,
@@ -274,6 +275,7 @@ internal fun TodayContent(
 
 private fun LazyListScope.todaySection(
     section: TodaySection,
+    streaks: Map<String, Int>,
     reorderState: ReorderState,
     onToggle: (GoalStatus) -> Unit,
     onOpenGoal: (String) -> Unit,
@@ -304,6 +306,7 @@ private fun LazyListScope.todaySection(
         GoalRow(
             status = status,
             isDragging = dragging,
+            streak = streaks[status.goal.id] ?: 0,
             onToggle = { onToggle(status) },
             onOpen = { onOpenGoal(status.goal.id) },
             onDelete = { onRequestDelete(status) },

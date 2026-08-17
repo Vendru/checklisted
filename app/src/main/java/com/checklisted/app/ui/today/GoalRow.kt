@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
@@ -31,11 +34,17 @@ import com.checklisted.app.ui.components.NeoIconTrash
 import com.checklisted.app.ui.components.NeoSwipeAction
 import com.checklisted.app.ui.components.NeoSwipeRow
 import com.checklisted.app.ui.components.NeoSwipeState
+import com.checklisted.app.ui.components.neoSurface
 import com.checklisted.app.ui.components.rememberNeoSwipeState
 import com.checklisted.app.ui.theme.NeoAccent
+import com.checklisted.app.ui.theme.NeoCombCell
 import com.checklisted.app.ui.theme.NeoTheme
+import com.checklisted.app.ui.theme.NeoTokens
 
 private const val DRAG_SCALE = 1.03f
+
+/** One completed period is not a streak; two is the first one worth showing. */
+private const val MIN_VISIBLE_STREAK = 2
 
 /**
  * One goal on the Today screen.
@@ -50,6 +59,7 @@ fun GoalRow(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     isDragging: Boolean = false,
+    streak: Int = 0,
     onDelete: (() -> Unit)? = null,
     onMoveUp: (() -> Unit)? = null,
     onMoveDown: (() -> Unit)? = null,
@@ -118,6 +128,7 @@ fun GoalRow(
         GoalCard(
             status = status,
             accent = accent,
+            streak = streak,
             isDragging = isDragging,
             rowActions = rowActions,
             onToggle = onToggle,
@@ -130,6 +141,7 @@ fun GoalRow(
 private fun GoalCard(
     status: GoalStatus,
     accent: NeoAccent,
+    streak: Int,
     isDragging: Boolean,
     rowActions: List<CustomAccessibilityAction>,
     onToggle: () -> Unit,
@@ -182,6 +194,13 @@ private fun GoalCard(
                 }
             }
 
+            // Only from two up. A "1" next to every goal ticked once would be
+            // wallpaper; appearing on the second period is what makes it read as
+            // something earned.
+            if (streak >= MIN_VISIBLE_STREAK) {
+                StreakBadge(streak = streak)
+            }
+
             // The tag: 8.dp of the goal's own colour. Small enough to stay quiet,
             // saturated enough to identify the row at a glance.
             Box(
@@ -190,5 +209,41 @@ private fun GoalCard(
                     .background(accent.color, CircleShape),
             )
         }
+    }
+}
+
+/**
+ * How many periods in a row this goal has been kept.
+ *
+ * Wears the comb cell rather than a pill, and the muted wax rather than the action
+ * colour: the row already has one honey block in the checkbox, and a second would
+ * compete with the only thing on the row that is actually tappable.
+ */
+@Composable
+private fun StreakBadge(streak: Int) {
+    val colors = NeoTheme.colors
+    val spoken = pluralStringResource(R.plurals.a11y_streak, streak, streak)
+
+    Box(
+        modifier = Modifier
+            .neoSurface(
+                color = colors.surfaceMuted,
+                shape = NeoCombCell,
+                shadowOffset = 0.dp,
+                borderWidth = NeoTokens.HairlineBorder,
+            )
+            // Grows with the number instead of clipping it: a daily goal kept for
+            // five months is a three-digit streak, and that is exactly the user this
+            // badge is for.
+            .defaultMinSize(minWidth = 26.dp, minHeight = 26.dp)
+            .padding(horizontal = 6.dp)
+            .semantics { contentDescription = spoken },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.streak_badge, streak),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.ink,
+        )
     }
 }

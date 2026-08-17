@@ -11,6 +11,7 @@ import com.checklisted.app.domain.period.TodayClock
 import com.checklisted.app.domain.repository.CompletionRepository
 import com.checklisted.app.domain.repository.GoalRepository
 import com.checklisted.app.domain.repository.SettingsRepository
+import com.checklisted.app.domain.streak.StreakCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,8 @@ data class TodaySection(
 data class TodayUiState(
     val date: LocalDate? = null,
     val sections: List<TodaySection> = emptyList(),
+    /** Current run length per goal id. Absent means zero. */
+    val streaks: Map<String, Int> = emptyMap(),
     val isLoading: Boolean = true,
 ) {
     /** No goals at all, as opposed to goals that merely have nothing done yet. */
@@ -69,16 +72,33 @@ class TodayViewModel @Inject constructor(
             // goal are each asking about a different period.
             val keysByRecurrence = Recurrence.entries.associateWith { periods.periodKey(it, date) }
 
+            // The whole history, not just today's periods: a streak is by definition a
+            // question about the past. Same flow the history screen already reads, and
+            // the run is computed by the same calculator the detail screen uses — this
+            // screen was the only one hiding a number it could have shown.
             combine(
                 goalRepository.observeGoals(),
                 completionRepository.observeCompletions(keysByRecurrence.values),
+                completionRepository.observeAllCompletions(),
                 pendingOrder,
-            ) { goals, completions, order ->
+            ) { goals, completions, allCompletions, order ->
                 val completedGoalIds = completions.mapTo(mutableSetOf()) { it.goalId to it.periodKey }
                 val ordered = applyPendingOrder(goals, order)
 
+                val streakCalculator = StreakCalculator(periods)
+                val keysByGoal = allCompletions.groupBy { it.goalId }
+                    .mapValues { (_, rows) -> rows.mapTo(mutableSetOf()) { it.periodKey } }
+                val streaks = ordered.associate { goal ->
+                    goal.id to streakCalculator.currentStreak(
+                        recurrence = goal.recurrence,
+                        completedKeys = keysByGoal[goal.id].orEmpty(),
+                        today = date,
+                    )
+                }
+
                 TodayUiState(
                     date = date,
+                    streaks = streaks,
                     isLoading = false,
                     sections = Recurrence.entries.map { recurrence ->
                         val key = keysByRecurrence.getValue(recurrence)

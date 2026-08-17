@@ -33,6 +33,11 @@
     <!-- Tela Hoje -->
     <string name="today_title">Hoje</string>
     <string name="section_counter">%1$d/%2$d</string>
+    <string name="streak_badge">%1$d</string>
+    <plurals name="a11y_streak">
+        <item quantity="one">Sequência de %1$d período</item>
+        <item quantity="other">Sequência de %1$d períodos</item>
+    </plurals>
     <string name="empty_today_title">Colmeia vazia</string>
     <string name="empty_today_message">Nenhuma meta ainda, o que é bem menos culpa do que parece. Crie a primeira e comece a encher o favo.</string>
     <string name="empty_section_daily">Nenhuma meta diária. O dia está por sua conta.</string>

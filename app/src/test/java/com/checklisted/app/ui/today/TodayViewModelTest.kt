@@ -268,6 +268,26 @@ class TodayViewModelTest {
         assertTrue(completions.value.isEmpty())
     }
 
+    @Test
+    fun `the streak of each goal reaches the today screen`() = runTest(dispatcher) {
+        goals.value = listOf(goal("a", Recurrence.DAILY, 0), goal("b", Recurrence.DAILY, 1))
+        // "a" kept for three days running, ending today. "b" has a single old day,
+        // which is a completion but not a run that reaches the present.
+        completions.value = listOf("2026-08-16", "2026-08-15", "2026-08-14").mapIndexed { i, key ->
+            Completion(id = "a$i", goalId = "a", periodKey = PeriodKey(key), completedAt = Instant.EPOCH)
+        } + Completion(
+            id = "b0",
+            goalId = "b",
+            periodKey = PeriodKey("2026-08-01"),
+            completedAt = Instant.EPOCH,
+        )
+
+        val state = viewModel().uiState.first { !it.isLoading }
+
+        assertEquals(3, state.streaks["a"])
+        assertEquals(0, state.streaks["b"])
+    }
+
     /**
      * The completions going with it is the schema's job — `onDelete = CASCADE` on the
      * completion's foreign key — not the view model's, so what is checked here is that
