@@ -40,9 +40,6 @@
     </plurals>
     <string name="empty_today_title">Colmeia vazia</string>
     <string name="empty_today_message">Nenhuma meta ainda, o que é bem menos culpa do que parece. Crie a primeira e comece a encher o favo.</string>
-    <string name="empty_section_daily">Nenhuma meta diária. O dia está por sua conta.</string>
-    <string name="empty_section_weekly">Nenhuma meta semanal por enquanto.</string>
-    <string name="empty_section_monthly">Nenhuma meta mensal por enquanto.</string>
 
     <!-- Editor de meta -->
     <string name="goal_editor_title_new">Nova meta</string>
@@ -99,6 +96,11 @@
     <string name="settings_reminder_hint">Um toque no fim do dia, só se ainda faltar alguma coisa.</string>
     <string name="settings_reminder_enable">Ativar lembrete</string>
     <string name="settings_reminder_time">Horário</string>
+    <string name="settings_reminder_change">Alterar</string>
+    <string name="settings_reminder_next_today">Toca hoje às %1$s.</string>
+    <string name="settings_reminder_next_tomorrow">Toca amanhã às %1$s.</string>
+    <string name="reminder_picker_hour">Hora</string>
+    <string name="reminder_picker_minute">Minuto</string>
     <string name="settings_reminder_permission_denied">Sem permissão de notificação, o lembrete não aparece. Dá para liberar nos ajustes do sistema.</string>
     <string name="settings_archived">Metas arquivadas</string>
     <string name="settings_archived_hint">Arquivar tira a meta da lista de hoje sem apagar nada. É aqui que ela volta.</string>

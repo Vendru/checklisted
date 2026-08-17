@@ -201,11 +201,12 @@ private fun GoalCard(
                 StreakBadge(streak = streak)
             }
 
-            // The tag: 8.dp of the goal's own colour. Small enough to stay quiet,
-            // saturated enough to identify the row at a glance.
+            // The tag, in the goal's own colour. At 8.dp it was too small to tell
+            // five colours apart, which is the one job it has; 12.dp still reads as a
+            // mark rather than as a second block competing with the checkbox.
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .size(12.dp)
                     .background(accent.color, CircleShape),
             )
         }

@@ -227,7 +227,10 @@ internal fun TodayContent(
                     )
                 }
             } else {
-                state.sections.forEach { section ->
+                // Only sections that hold something. An empty "Mensal 0/1" with a
+                // blank bar is a permanent reminder of a feature the user chose not to
+                // use; the recurrence field in the editor is where those are learned.
+                state.sections.filter { it.goals.isNotEmpty() }.forEach { section ->
                     todaySection(
                         section = section,
                         streaks = state.streaks,
@@ -289,17 +292,6 @@ private fun LazyListScope.todaySection(
 ) {
     item(key = "header-${section.recurrence.name}") {
         SectionHeader(section = section)
-    }
-
-    if (section.goals.isEmpty()) {
-        item(key = "empty-${section.recurrence.name}") {
-            Text(
-                text = stringResource(section.recurrence.emptyMessageRes()),
-                style = MaterialTheme.typography.bodyMedium,
-                color = NeoTheme.colors.ink,
-                modifier = Modifier.padding(bottom = 4.dp),
-            )
-        }
     }
 
     itemsIndexed(items = section.goals, key = { _, status -> status.goal.id }) { index, status ->
@@ -374,12 +366,6 @@ private fun Recurrence.labelRes() = when (this) {
     Recurrence.DAILY -> R.string.recurrence_daily
     Recurrence.WEEKLY -> R.string.recurrence_weekly
     Recurrence.MONTHLY -> R.string.recurrence_monthly
-}
-
-private fun Recurrence.emptyMessageRes() = when (this) {
-    Recurrence.DAILY -> R.string.empty_section_daily
-    Recurrence.WEEKLY -> R.string.empty_section_weekly
-    Recurrence.MONTHLY -> R.string.empty_section_monthly
 }
 
 /** Between two goals in the same section. */
