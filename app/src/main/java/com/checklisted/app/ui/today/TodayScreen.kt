@@ -23,7 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -107,7 +107,11 @@ internal fun TodayContent(
     // Deleting takes the goal's history with it, so the swipe only ever opens this
     // question. Held here rather than in the row: the row is inside a LazyColumn and
     // is disposed the moment the list scrolls, which would close the dialog.
-    var pendingDelete by remember { mutableStateOf<GoalStatus?>(null) }
+    //
+    // Saved rather than remembered, and by id rather than by value: a rotation used
+    // to dismiss the question mid-decision, and the goal it refers to is not itself
+    // something that survives a process death — it is re-read from state below.
+    var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
     val reorderState = rememberReorderState(
         listState = listState,
         onMove = onMove,
@@ -197,7 +201,7 @@ internal fun TodayContent(
                         reorderState = reorderState,
                         onToggle = onToggle,
                         onOpenGoal = onOpenGoal,
-                        onRequestDelete = { status -> pendingDelete = status },
+                        onRequestDelete = { status -> pendingDeleteId = status.goal.id },
                         onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                         onReorder = { dragged, target ->
                             if (onMove(dragged, target)) onCommitOrder()
@@ -220,7 +224,13 @@ internal fun TodayContent(
         }
     }
 
-    val doomed = pendingDelete
+    // Resolves to null if the goal disappeared while the dialog was up, which closes
+    // the dialog rather than leaving it asking about something that no longer exists.
+    val doomed = pendingDeleteId?.let { id ->
+        state.sections.firstNotNullOfOrNull { section ->
+            section.goals.firstOrNull { it.goal.id == id }
+        }
+    }
     if (doomed != null) {
         NeoDialog(
             title = stringResource(R.string.dialog_delete_title),
@@ -229,10 +239,10 @@ internal fun TodayContent(
             dismissText = stringResource(R.string.action_cancel),
             destructive = true,
             onConfirm = {
-                pendingDelete = null
+                pendingDeleteId = null
                 onDelete(doomed.goal.id)
             },
-            onDismissRequest = { pendingDelete = null },
+            onDismissRequest = { pendingDeleteId = null },
         )
     }
 }

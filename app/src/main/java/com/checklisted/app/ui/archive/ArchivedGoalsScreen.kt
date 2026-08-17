@@ -18,7 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +64,8 @@ internal fun ArchivedGoalsContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = NeoTheme.colors
-    var pendingDelete by remember { mutableStateOf<Goal?>(null) }
+    // By id and saved, so a rotation does not drop a destructive confirmation.
+    var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
 
     val insets = WindowInsets.systemBars
         .add(WindowInsets(left = 20.dp, top = 20.dp, right = 20.dp, bottom = 32.dp))
@@ -110,13 +111,13 @@ internal fun ArchivedGoalsContent(
                 ArchivedGoalCard(
                     goal = goal,
                     onUnarchive = { onUnarchive(goal.id) },
-                    onDelete = { pendingDelete = goal },
+                    onDelete = { pendingDeleteId = goal.id },
                 )
             }
         }
     }
 
-    val doomed = pendingDelete
+    val doomed = pendingDeleteId?.let { id -> state.goals.firstOrNull { it.id == id } }
     if (doomed != null) {
         NeoDialog(
             title = stringResource(R.string.dialog_delete_title),
@@ -125,10 +126,10 @@ internal fun ArchivedGoalsContent(
             dismissText = stringResource(R.string.action_cancel),
             destructive = true,
             onConfirm = {
-                pendingDelete = null
+                pendingDeleteId = null
                 onDelete(doomed.id)
             },
-            onDismissRequest = { pendingDelete = null },
+            onDismissRequest = { pendingDeleteId = null },
         )
     }
 }
