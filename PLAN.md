@@ -1,7 +1,9 @@
-# PLAN.md — Checklisted
+# PLAN.md — BeeBetter
 
 App Android nativo, offline-first, de checklist de metas com recorrência diária,
-semanal e mensal. Visual neobrutalista. Sem backend, sem login, sem rede.
+semanal e mensal. Visual neobrutalista domado, com identidade de colmeia:
+cera, mel e tinta, e a célula hexagonal como forma-assinatura. Sem backend,
+sem login, sem rede.
 
 ---
 
@@ -19,7 +21,8 @@ Respostas às perguntas em aberto, que fixam a lógica de domínio e os testes:
 Defaults assumidos (diga se quiser diferente):
 
 - `applicationId` / namespace: `com.checklisted.app`
-- Nome do app: **Checklisted**
+- Nome do app: **BeeBetter** (o `applicationId` segue `com.checklisted.app` —
+  renomear o pacote é uma decisão à parte, ver abaixo)
 - Lembrete diário **global** (um só, não por meta), conforme o escopo da v1
 - Excluir meta faz **cascade** nas `Completion` (o histórico se preserva via
   *arquivar*, que é a ação não destrutiva)
@@ -167,12 +170,12 @@ commit e um resumo para você antes de eu seguir.
 Estado final:
 
 - [x] `./gradlew assembleDebug` passando
-- [x] `./gradlew test` passando — 134 testes
+- [x] `./gradlew test` passando — 135 testes
 - [x] Nenhum warning novo de compilação
 - [x] `@Preview` para cada componente do design system
 - [x] ktlint sem violações
 
-- [x] `./gradlew verifyPaparazziDebug` passando — 40 screenshots
+- [x] `./gradlew verifyPaparazziDebug` passando — 41 screenshots
 
 `./gradlew assembleRelease` também passa, com R8 e shrink de recursos ligados.
 
@@ -208,6 +211,44 @@ Duas armadilhas da ferramenta, documentadas para não serem redescobertas:
 Continua **não verificado em dispositivo**: o gesto de arraste (incluindo a rolagem
 automática), o disparo real do WorkManager e a notificação. Screenshot test cobre
 pixels parados, não gesto nem agendamento.
+
+---
+
+## Identidade — BeeBetter
+
+A marca é a colmeia, e o que a carrega é a paleta antes de qualquer desenho: a
+página é **cera** (`#FBF3E2`), a cor de ação é **mel** (`#C77F00`) e o rótulo
+sobre ela é **tinta**, não branco — preto sobre âmbar é o único par de cores que
+todo mundo já lê como abelha.
+
+O mel é fundo em vez do amarelo vivo que a abelha sugere porque essa cor também
+precisa funcionar como *traço* sobre um card branco: no brilho máximo media 2:1
+ali, invisível como o tique do estado vazio ou o preenchimento da barra de
+progresso. O amarelo vivo sobrou para o tema escuro e para o ícone, onde não há
+texto a contrastar.
+
+A rampa do heatmap passou a compartilhar o matiz do mel — uma célula que se
+preenche *é* uma célula de favo enchendo — mas é mantida um degrau de valor mais
+escura que a ação (2,2:1 de distância), porque pintar o grid exatamente na cor
+dos botões já fez "isto é tocável" e "esta semana foi cheia" parecerem a mesma
+coisa.
+
+O carmim da exclusão é a única cor que não deve nada à colmeia. Todo o resto é
+cera, mel ou tinta — vizinhos na roda —, então um vermelho tirado dessa família
+leria como mais um tom de mel em vez de exceção.
+
+A célula hexagonal (`NeoCombCell`) é a forma-assinatura: caixa de seleção, estado
+vazio e ícone do launcher. **Não** o heatmap — favo de verdade precisa de linhas
+alternadas defasadas para fechar, e defasar aquele grid custaria as linhas retas
+de dia da semana e as colunas de semana alinhadas que levaram dois defeitos de
+aparelho para acertar.
+
+### Pendente
+
+O `applicationId` e o pacote Kotlin continuam `com.checklisted.app`. Renomear
+alcança todos os arquivos do módulo, o nome do banco Room e os 40 nomes de
+arquivo de screenshot; é uma decisão à parte, sem efeito visível para quem usa o
+app enquanto ele não for publicado.
 
 ---
 

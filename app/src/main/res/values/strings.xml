@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Checklisted</string>
+    <string name="app_name">BeeBetter</string>
 
     <!-- Ações -->
     <string name="action_new_goal">Nova meta</string>
@@ -33,8 +33,8 @@
     <!-- Tela Hoje -->
     <string name="today_title">Hoje</string>
     <string name="section_counter">%1$d/%2$d</string>
-    <string name="empty_today_title">Nada aqui ainda</string>
-    <string name="empty_today_message">Sua lista está em branco, o que é bem menos culpa do que parece. Crie a primeira meta e comece a riscar.</string>
+    <string name="empty_today_title">Colmeia vazia</string>
+    <string name="empty_today_message">Nenhuma meta ainda, o que é bem menos culpa do que parece. Crie a primeira e comece a encher o favo.</string>
     <string name="empty_section_daily">Nenhuma meta diária. O dia está por sua conta.</string>
     <string name="empty_section_weekly">Nenhuma meta semanal por enquanto.</string>
     <string name="empty_section_monthly">Nenhuma meta mensal por enquanto.</string>
@@ -57,18 +57,18 @@
     <string name="stat_rate_weekly">Últimas 4 semanas</string>
     <string name="stat_rate_monthly">Últimos 3 meses</string>
     <string name="detail_heatmap_title">Últimos 3 meses</string>
-    <string name="detail_heatmap_hint">Toque num quadrado para marcar ou desmarcar aquele período.</string>
+    <string name="detail_heatmap_hint">Toque numa célula para marcar ou desmarcar aquele período.</string>
     <string name="action_edit">Editar</string>
 
     <!-- Histórico -->
     <string name="history_title">Histórico</string>
     <string name="action_history">Histórico</string>
     <string name="action_close">Fechar</string>
-    <string name="history_hint">Quanto mais cheio o quadrado, mais metas você concluiu naquele dia.</string>
+    <string name="history_hint">Quanto mais cheia a célula, mais metas você concluiu naquele dia.</string>
     <string name="history_day_hint">Marque o que ficou para trás. Metas semanais e mensais valem para o período inteiro.</string>
     <string name="history_day_archived">arquivada</string>
     <string name="empty_history_title">Sem histórico ainda</string>
-    <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
+    <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O favo fica bem mais interessante cheio.</string>
     <string name="heatmap_legend_less">menos</string>
     <string name="heatmap_legend_more">mais</string>
     <string name="heatmap_age_now">agora</string>
@@ -101,7 +101,7 @@
     <string name="archived_title">Arquivadas</string>
     <string name="archived_hint">Elas não aparecem em Hoje, mas o histórico delas continua no calendário.</string>
     <string name="empty_archived_title">Nada arquivado</string>
-    <string name="empty_archived_message">Quando uma meta sair de cena sem você querer apagar o histórico, arquive — ela espera aqui.</string>
+    <string name="empty_archived_message">Quando uma meta sair de cena sem você querer apagar o histórico, arquive — ela hiberna aqui.</string>
 
     <!-- Notificação -->
     <string name="notification_channel_name">Lembrete diário</string>

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
 import com.checklisted.app.ui.theme.NeoAccent
-import com.checklisted.app.ui.theme.NeoShapes
+import com.checklisted.app.ui.theme.NeoCombCell
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
 
@@ -98,7 +98,7 @@ fun NeoCheckbox(
             modifier = Modifier
                 .neoSurface(
                     color = if (checked) (accent?.color ?: colors.action) else colors.surface,
-                    shape = NeoShapes.small,
+                    shape = NeoCombCell,
                     pressed = pressed,
                     enabled = enabled,
                 )
@@ -109,9 +109,12 @@ fun NeoCheckbox(
 
                     val w = this.size.width
                     val h = this.size.height
-                    val start = Offset(w * 0.24f, h * 0.52f)
-                    val elbow = Offset(w * 0.44f, h * 0.72f)
-                    val end = Offset(w * 0.78f, h * 0.28f)
+                    // Pulled in from the old square's corners: a hexagon has no room
+                    // at 0.24/0.78 on the diagonals, and the tick would have crossed
+                    // the sloped edges.
+                    val start = Offset(w * 0.26f, h * 0.52f)
+                    val elbow = Offset(w * 0.44f, h * 0.70f)
+                    val end = Offset(w * 0.74f, h * 0.32f)
 
                     // Two segments drawn in sequence: the short down-stroke first,
                     // then the long up-stroke, so the tick reads as being written.
@@ -134,7 +137,11 @@ fun NeoCheckbox(
 
                     drawPath(
                         path = path,
-                        color = if (accent == null) colors.onAction else colors.surface,
+                        // Ink on every fill, including a tag colour. The white tick a
+                        // tagged box used to get measured 2.27:1 on yellow and 2.92:1
+                        // on teal — under the 3:1 a mark like this needs. Ink clears it
+                        // on all five, worst case 3.66:1 on purple.
+                        color = colors.onAction,
                         style = Stroke(
                             width = CheckStroke.toPx(),
                             cap = StrokeCap.Square,

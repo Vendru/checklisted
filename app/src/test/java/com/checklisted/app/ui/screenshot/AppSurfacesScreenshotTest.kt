@@ -1,20 +1,27 @@
 package com.checklisted.app.ui.screenshot
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import com.checklisted.app.R
 import com.checklisted.app.domain.history.HeatmapDay
 import com.checklisted.app.domain.model.Goal
 import com.checklisted.app.domain.model.GoalStatus
@@ -179,11 +186,46 @@ class AppSurfacesScreenshotTest {
     @Test
     fun emptyState() = bothThemes("estado-vazio") {
         NeoEmptyState(
-            title = "Nada aqui ainda",
-            message = "Sua lista está em branco, o que é bem menos culpa do que parece. " +
-                "Crie a primeira meta e comece a riscar.",
+            title = "Colmeia vazia",
+            message = "Nenhuma meta ainda, o que é bem menos culpa do que parece. " +
+                "Crie a primeira e comece a encher o favo.",
             action = { NeoButton(text = "Nova meta", onClick = {}) },
         )
+    }
+
+    /**
+     * The launcher mark, at the size a launcher draws it and at the size a settings
+     * list does. The hexagon's vertices are hand-computed against the 108dp canvas;
+     * this is the only thing that checks they landed inside the safe zone and that
+     * the check still reads once the icon is thumbnail-sized.
+     */
+    @Test
+    fun launcherIcon() {
+        paparazzi.snapshot(name = "icone") {
+            NeoTheme(darkTheme = false) {
+                Row(
+                    modifier = Modifier
+                        .background(NeoTheme.colors.background)
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    listOf(108.dp, 48.dp, 24.dp).forEach { size ->
+                        Box(
+                            modifier = Modifier
+                                .size(size)
+                                .background(colorResource(R.color.neo_launcher_background)),
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.ic_launcher_foreground),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Test

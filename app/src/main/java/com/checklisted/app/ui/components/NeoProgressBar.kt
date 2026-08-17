@@ -53,7 +53,11 @@ fun NeoProgressBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .neoSurface(color = NeoTheme.colors.surfaceMuted, shape = NeoShapes.extraSmall)
+            // The empty part of the bar is the card colour, not the muted wax it used
+            // to be: honey against wax measured 2.55:1, under the 3:1 WCAG asks of a
+            // graphical object, and the filled length is the whole information here.
+            // Against white it is 3.25:1.
+            .neoSurface(color = NeoTheme.colors.surface, shape = NeoShapes.extraSmall)
             .semantics { progressBarRangeInfo = ProgressBarRangeInfo(shown, 0f..1f) },
     ) {
         Box(

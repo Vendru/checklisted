@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.checklisted.app.R
-import com.checklisted.app.ui.theme.NeoShapes
+import com.checklisted.app.ui.theme.NeoCombCell
 import com.checklisted.app.ui.theme.NeoTheme
 
 /**
@@ -74,8 +74,8 @@ private fun EmptyBoxMark() {
     val colors = NeoTheme.colors
     Column(
         modifier = Modifier
-            .neoSurface(color = colors.surface, shape = NeoShapes.medium)
-            .size(80.dp),
+            .neoSurface(color = colors.surface, shape = NeoCombCell)
+            .size(84.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="neo_background">#FAF3E0</color>
-    <color name="neo_ink">#000000</color>
-    <color name="neo_launcher_background">#FFD23F</color>
+    <color name="neo_background">#FBF3E2</color>
+    <color name="neo_ink">#1E1809</color>
+    <color name="neo_launcher_background">#FFC233</color>
 </resources>
