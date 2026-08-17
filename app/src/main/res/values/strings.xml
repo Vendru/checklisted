@@ -72,6 +72,8 @@
     <string name="heatmap_legend_less">menos</string>
     <string name="heatmap_legend_more">mais</string>
     <string name="heatmap_age_now">agora</string>
+    <string name="a11y_heatmap_day">%1$s, %2$d de %3$d metas concluídas</string>
+    <string name="a11y_heatmap_day_untracked">%1$s, nenhuma meta existia ainda</string>
     <plurals name="heatmap_age_months">
         <item quantity="one">%d mês</item>
         <item quantity="other">%d meses</item>

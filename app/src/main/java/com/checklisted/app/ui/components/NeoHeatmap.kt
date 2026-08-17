@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,8 @@ import com.checklisted.app.ui.theme.NeoShapes
 import com.checklisted.app.ui.theme.NeoTheme
 import com.checklisted.app.ui.theme.NeoTokens
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 
@@ -196,7 +199,18 @@ private fun HeatmapCell(
 ) {
     val colors = NeoTheme.colors
     val interactionSource = rememberNeoInteractionSource()
-    val label = "${day.date}: ${day.completed}/${day.total}"
+
+    // Spelled out, because this is read aloud roughly ninety times on one screen.
+    // "2026-08-17: 2/3" is an ISO date and a bare fraction — a screen reader renders
+    // it as a run of digits with no unit and no clue what the second number counts.
+    val spokenDate = remember(day.date) {
+        day.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(AppLocale))
+    }
+    val label = if (day.isTracked) {
+        stringResource(R.string.a11y_heatmap_day, spokenDate, day.completed, day.total)
+    } else {
+        stringResource(R.string.a11y_heatmap_day_untracked, spokenDate)
+    }
 
     val clickModifier = if (onClick != null && day.isTracked) {
         Modifier.neoClickable(interactionSource = interactionSource) { onClick(day) }
