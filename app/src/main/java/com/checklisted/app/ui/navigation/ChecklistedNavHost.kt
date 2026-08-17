@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.checklisted.app.ui.archive.ArchivedGoalsScreen
 import com.checklisted.app.ui.goal.GoalDetailScreen
 import com.checklisted.app.ui.goal.GoalEditorScreen
 import com.checklisted.app.ui.history.HistoryScreen
@@ -35,6 +36,11 @@ sealed interface Destination {
 
     data object Settings : Destination {
         override val route: String = "settings"
+    }
+
+    /** The way back out of the archive, reachable only from Settings. */
+    data object ArchivedGoals : Destination {
+        override val route: String = "archived"
     }
 
     /**
@@ -89,7 +95,14 @@ fun ChecklistedNavHost(
         }
 
         composable(Destination.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onOpenArchived = { navController.navigate(Destination.ArchivedGoals.route) },
+            )
+        }
+
+        composable(Destination.ArchivedGoals.route) {
+            ArchivedGoalsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(

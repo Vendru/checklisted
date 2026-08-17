@@ -66,6 +66,7 @@
     <string name="action_close">Fechar</string>
     <string name="history_hint">Quanto mais cheio o quadrado, mais metas você concluiu naquele dia.</string>
     <string name="history_day_hint">Marque o que ficou para trás. Metas semanais e mensais valem para o período inteiro.</string>
+    <string name="history_day_archived">arquivada</string>
     <string name="empty_history_title">Sem histórico ainda</string>
     <string name="empty_history_message">Crie uma meta e volte aqui em alguns dias. O grid fica bem mais interessante cheio.</string>
     <string name="heatmap_legend_less">menos</string>
@@ -87,6 +88,15 @@
     <string name="settings_reminder_enable">Ativar lembrete</string>
     <string name="settings_reminder_time">Horário</string>
     <string name="settings_reminder_permission_denied">Sem permissão de notificação, o lembrete não aparece. Dá para liberar nos ajustes do sistema.</string>
+    <string name="settings_archived">Metas arquivadas</string>
+    <string name="settings_archived_hint">Arquivar tira a meta da lista de hoje sem apagar nada. É aqui que ela volta.</string>
+    <string name="settings_archived_open">Ver arquivadas</string>
+
+    <!-- Arquivadas -->
+    <string name="archived_title">Arquivadas</string>
+    <string name="archived_hint">Elas não aparecem em Hoje, mas o histórico delas continua no calendário.</string>
+    <string name="empty_archived_title">Nada arquivado</string>
+    <string name="empty_archived_message">Quando uma meta sair de cena sem você querer apagar o histórico, arquive — ela espera aqui.</string>
 
     <!-- Notificação -->
     <string name="notification_channel_name">Lembrete diário</string>

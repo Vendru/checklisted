@@ -41,14 +41,27 @@ private val LabelWidth = 20.dp
 private val CellGap = 3.dp
 
 /**
+ * Which chunk of [days] a screen column holds.
+ *
+ * [days] is oldest first; the columns are newest first. Every read of the list goes
+ * through here so the grid and its month axis can never disagree about the order.
+ */
+private fun weekOf(column: Int, weeks: Int): Int = weeks - 1 - column
+
+/**
  * Calendar grid of the recent past, one square per day.
  *
  * Weekdays run down the page and **weeks run across it**, so three months fit in
  * seven short rows instead of thirteen tall ones. Laying it out the other way round
- * gave cells a seventh of the screen width each, made the grid taller than the
- * display, and — because the oldest period sorts first — opened the screen on months
- * of empty squares from before the goal existed. Here the newest week is the
- * rightmost column, which is where the eye lands.
+ * gave cells a seventh of the screen width each and made the grid taller than the
+ * display.
+ *
+ * Time runs **right to left**: this week is the first column, and the further right
+ * you look the further back you are. A new goal has one marked square and ninety
+ * blank ones, and with the usual left-to-right calendar order that one square sat in
+ * the far corner with three months of nothing leading up to it. The cost is that the
+ * month names read backwards along the top, which is the honest price of putting the
+ * present where the eye lands.
  *
  * Intensity is quantised into four solid fills. The ramp is deliberately not the
  * action colour and takes no accent: this grid repeats its colour dozens of times on
@@ -88,8 +101,8 @@ fun NeoHeatmap(
                     color = colors.inkSoft,
                     modifier = Modifier.width(LabelWidth),
                 )
-                repeat(weeks) { week ->
-                    val day = days.getOrNull(week * DAYS_PER_WEEK + weekday)
+                repeat(weeks) { column ->
+                    val day = days.getOrNull(weekOf(column, weeks) * DAYS_PER_WEEK + weekday)
                     if (day == null) {
                         // The rest of the current week. The record stops at today, so
                         // on a Monday the last column holds one single day: an invisible
@@ -128,8 +141,10 @@ private fun MonthAxis(days: List<HeatmapDay>, weeks: Int, locale: Locale) {
     ) {
         Spacer(modifier = Modifier.width(LabelWidth))
         var previousMonth: Month? = null
-        repeat(weeks) { week ->
-            val month = days.getOrNull(week * DAYS_PER_WEEK)?.date?.month
+        repeat(weeks) { column ->
+            // Named where the reader meets it, which running backwards means the
+            // month's last week rather than its first.
+            val month = days.getOrNull(weekOf(column, weeks) * DAYS_PER_WEEK)?.date?.month
             val label = if (month != null && month != previousMonth) {
                 month.getDisplayName(TextStyle.SHORT, locale).take(3)
             } else {

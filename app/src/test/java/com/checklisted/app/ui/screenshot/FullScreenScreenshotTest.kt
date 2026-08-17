@@ -19,6 +19,8 @@ import com.checklisted.app.domain.model.Recurrence
 import com.checklisted.app.domain.streak.CompletionRate
 import com.checklisted.app.domain.streak.GoalStats
 import com.checklisted.app.ui.AppLocale
+import com.checklisted.app.ui.archive.ArchivedGoalsContent
+import com.checklisted.app.ui.archive.ArchivedGoalsUiState
 import com.checklisted.app.ui.components.NeoDialogContent
 import com.checklisted.app.ui.goal.GoalDetailContent
 import com.checklisted.app.ui.goal.GoalDetailUiState
@@ -210,6 +212,37 @@ class FullScreenScreenshotTest {
         )
     }
 
+    /** The way back out of the archive, which for a while did not exist at all. */
+    @Test
+    fun archivedGoalsFull() = bothThemes("tela-arquivadas") {
+        ArchivedGoalsContent(
+            state = ArchivedGoalsUiState(
+                isLoading = false,
+                goals = listOf(
+                    goal("x", "Meditar 10 minutos", Recurrence.DAILY, "PURPLE")
+                        .copy(isArchived = true),
+                    goal("y", "Estudar alemão toda terça e quinta de manhã", Recurrence.WEEKLY, "TEAL")
+                        .copy(isArchived = true),
+                    goal("z", "Fechar as contas do mês", Recurrence.MONTHLY, "ORANGE")
+                        .copy(isArchived = true),
+                ),
+            ),
+            onBack = {},
+            onUnarchive = {},
+            onDelete = {},
+        )
+    }
+
+    @Test
+    fun archivedGoalsEmpty() = bothThemes("tela-arquivadas-vazia") {
+        ArchivedGoalsContent(
+            state = ArchivedGoalsUiState(isLoading = false, goals = emptyList()),
+            onBack = {},
+            onUnarchive = {},
+            onDelete = {},
+        )
+    }
+
     /**
      * The question a left swipe asks.
      *
@@ -278,7 +311,7 @@ class FullScreenScreenshotTest {
                             false,
                         ),
                         DayGoal(
-                            goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE"),
+                            goal("d", "Correr 5 km", Recurrence.WEEKLY, "PURPLE").copy(isArchived = true),
                             PeriodKey("2026-W34"),
                             false,
                         ),

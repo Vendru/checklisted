@@ -43,6 +43,7 @@ import com.checklisted.app.ui.components.NeoBackButton
 import com.checklisted.app.ui.components.NeoCard
 import com.checklisted.app.ui.components.NeoCheckbox
 import com.checklisted.app.ui.components.NeoChip
+import com.checklisted.app.ui.components.NeoOutlineButton
 import com.checklisted.app.ui.theme.NeoTheme
 import java.time.LocalTime
 
@@ -58,11 +59,11 @@ private val REMINDER_TIMES = listOf(
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onOpenArchived: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val colors = NeoTheme.colors
     val context = LocalContext.current
 
     var permissionDenied by remember { mutableStateOf(false) }
@@ -92,6 +93,7 @@ fun SettingsScreen(
             }
         },
         onReminderTimeChange = viewModel::setReminderTime,
+        onOpenArchived = onOpenArchived,
         modifier = modifier,
     )
 }
@@ -106,6 +108,7 @@ internal fun SettingsContent(
     onThemeChange: (ThemeMode) -> Unit,
     onReminderToggle: (Boolean) -> Unit,
     onReminderTimeChange: (LocalTime) -> Unit,
+    onOpenArchived: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = NeoTheme.colors
@@ -215,6 +218,17 @@ internal fun SettingsContent(
                     }
                 }
             }
+        }
+
+        SettingsSection(
+            title = stringResource(R.string.settings_archived),
+            hint = stringResource(R.string.settings_archived_hint),
+        ) {
+            NeoOutlineButton(
+                text = stringResource(R.string.settings_archived_open),
+                onClick = onOpenArchived,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

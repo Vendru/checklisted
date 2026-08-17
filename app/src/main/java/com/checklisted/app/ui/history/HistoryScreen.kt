@@ -155,12 +155,23 @@ internal fun DayGoalList(
                     accent = NeoAccent.fromTag(dayGoal.goal.colorTag),
                     contentDescription = dayGoal.goal.title,
                 )
-                Text(
-                    text = dayGoal.goal.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = NeoTheme.colors.ink,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = dayGoal.goal.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = NeoTheme.colors.ink,
+                    )
+                    // The sheet lists archived goals too, because their history
+                    // happened and the day would otherwise have holes. Unlabelled they
+                    // read as goals the user simply forgot about today.
+                    if (dayGoal.goal.isArchived) {
+                        Text(
+                            text = stringResource(R.string.history_day_archived),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = NeoTheme.colors.inkSoft,
+                        )
+                    }
+                }
             }
         }
     }

@@ -212,6 +212,7 @@ class AppSurfacesScreenshotTest {
             onWeekStartChange = {},
             onThemeChange = {},
             onReminderToggle = {},
+            onOpenArchived = {},
             onReminderTimeChange = {},
         )
     }
